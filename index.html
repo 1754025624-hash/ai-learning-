@@ -3,23 +3,223 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI学习网站</title>
+    <title>中医经方学习网站</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            line-height: 1.6;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        h1 {
+        
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            line-height: 1.6;
             color: #333;
+            background-color: #f9f5f0;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            padding: 40px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 2px solid #8b4513;
+            padding-bottom: 20px;
+        }
+        
+        h1 {
+            color: #8b4513;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #a0522d;
+            font-size: 1.2em;
+            font-style: italic;
+        }
+        
+        .intro {
+            background-color: #fff8f0;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 5px solid #8b4513;
+        }
+        
+        h2 {
+            color: #8b4513;
+            margin: 25px 0 15px 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e6d5c3;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+        }
+        
+        .jingfang-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .jingfang-card {
+            background-color: #fff;
+            border: 1px solid #e6d5c3;
+            border-radius: 8px;
+            padding: 20px;
+            transition: transform 0.3s;
+        }
+        
+        .jingfang-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(139, 69, 19, 0.1);
+        }
+        
+        .jingfang-card h3 {
+            color: #8b4513;
+            margin-bottom: 10px;
+        }
+        
+        .jingfang-card .indications {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+        
+        .resources {
+            background-color: #f5f0e6;
+            padding: 25px;
+            border-radius: 8px;
+            margin-top: 30px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e6d5c3;
+            color: #777;
+        }
+        
+        .highlight {
+            color: #8b4513;
+            font-weight: bold;
+        }
+        
+        ul, ol {
+            padding-left: 20px;
+            margin: 10px 0;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .jingfang-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>欢迎来到AI学习网站</h1>
-    <p>这是一个专门用于学习人工智能的网站。</p>
-    <p>网站建设中...</p>
+    <div class="container">
+        <header>
+            <h1>中医经方学习网站</h1>
+            <p class="subtitle">传承经典，弘扬中医，学习张仲景《伤寒杂病论》经方智慧</p>
+        </header>
+        
+        <section class="intro">
+            <h2>网站简介</h2>
+            <p>本网站致力于中医经方的学习与传承，重点研究张仲景《伤寒杂病论》中的经典方剂。通过系统学习，掌握经方的辨证要点、药物组成、剂量比例和临床应用。</p>
+        </section>
+        
+        <section class="section">
+            <h2>经方入门</h2>
+            <p>经方，指汉代以前经典医药著作中记载的方剂，以张仲景的方剂为代表。其主要特点：</p>
+            <ul>
+                <li><span class="highlight">药简力宏</span>：药物组成精简，疗效显著</li>
+                <li><span class="highlight">配伍严谨</span>：君臣佐使分明，比例固定</li>
+                <li><span class="highlight">证方对应</span>：特定证候对应特定方剂</li>
+                <li><span class="highlight">剂量精准</span>：药物剂量有严格比例关系</li>
+            </ul>
+        </section>
+        
+        <section class="section">
+            <h2>常用经方介绍</h2>
+            <div class="jingfang-grid">
+                <div class="jingfang-card">
+                    <h3>桂枝汤</h3>
+                    <p><strong>组成：</strong>桂枝、芍药、甘草、生姜、大枣</p>
+                    <p><strong>功效：</strong>解肌发表，调和营卫</p>
+                    <p class="indications"><strong>主治：</strong>太阳中风证，症见发热、汗出、恶风、脉浮缓</p>
+                </div>
+                
+                <div class="jingfang-card">
+                    <h3>麻黄汤</h3>
+                    <p><strong>组成：</strong>麻黄、桂枝、杏仁、甘草</p>
+                    <p><strong>功效：</strong>发汗解表，宣肺平喘</p>
+                    <p class="indications"><strong>主治：</strong>太阳伤寒证，症见恶寒发热、头痛身痛、无汗而喘、脉浮紧</p>
+                </div>
+                
+                <div class="jingfang-card">
+                    <h3>小柴胡汤</h3>
+                    <p><strong>组成：</strong>柴胡、黄芩、人参、半夏、甘草、生姜、大枣</p>
+                    <p><strong>功效：</strong>和解少阳</p>
+                    <p class="indications"><strong>主治：</strong>少阳证，症见往来寒热、胸胁苦满、默默不欲饮食、心烦喜呕</p>
+                </div>
+                
+                <div class="jingfang-card">
+                    <h3>白虎汤</h3>
+                    <p><strong>组成：</strong>石膏、知母、甘草、粳米</p>
+                    <p><strong>功效：</strong>清热生津</p>
+                    <p class="indications"><strong>主治：</strong>阳明气分热盛证，症见壮热面赤、烦渴引饮、汗出恶热、脉洪大有力</p>
+                </div>
+            </div>
+        </section>
+        
+        <section class="section">
+            <h2>学习路径</h2>
+            <ol>
+                <li><span class="highlight">第一阶段：</span>基础理论 - 学习六经辨证、八纲辨证</li>
+                <li><span class="highlight">第二阶段：</span>经方记忆 - 掌握100首常用经方组成</li>
+                <li><span class="highlight">第三阶段：</span>方证对应 - 学习经方适用证候特点</li>
+                <li><span class="highlight">第四阶段：</span>临床应用 - 分析经方现代应用案例</li>
+                <li><span class="highlight">第五阶段：</span>加减变化 - 学习经方化裁应用</li>
+            </ol>
+        </section>
+        
+        <section class="resources">
+            <h2>学习资源</h2>
+            <ul>
+                <li>《伤寒杂病论》原文及白话解读</li>
+                <li>经方药物组成及剂量比例表</li>
+                <li>经方临床应用案例分析</li>
+                <li>经方加减变化规律总结</li>
+                <li>现代名医经方应用经验</li>
+            </ul>
+        </section>
+        
+        <footer>
+            <p>中医经方学习网站 &copy; 2024</p>
+            <p>传承中医经典，弘扬传统文化</p>
+            <p>网站正在建设中，更多内容即将更新...</p>
+        </footer>
+    </div>
 </body>
 </html>
