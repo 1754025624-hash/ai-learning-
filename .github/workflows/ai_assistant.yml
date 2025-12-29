@@ -1,0 +1,60 @@
+name: 中医经方AI助手
+
+on:
+  repository_dispatch:
+    types: [ask_ai_question]
+
+permissions:
+  contents: write
+
+jobs:
+  answer:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 准备环境
+        run: |
+          mkdir -p ai_answers
+      - name: 调用GitHub AI模型
+        id: call_ai
+        env:
+          USER_QUESTION: ${{ github.event.client_payload.question }}
+          SELECTED_MODEL: ${{ github.event.client_payload.model || 'gpt-4o' }}
+        run: |
+          RESPONSE=$(curl -s -X POST https://models.inference.ai.azure.com/v1/chat/completions \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"model\": \"$SELECTED_MODEL\",
+              \"messages\": [
+                {\"role\": \"system\", \"content\": \"你是精通《伤寒杂病论》的国医大师。回答需：1.引用经典原文 2.解释方药组成与配伍 3.分析适用证候 4.给出现代应用建议。语言需严谨而亲切。\"},
+                {\"role\": \"user\", \"content\": \"$USER_QUESTION\"}
+              ],
+              \"temperature\": 0.7,
+              \"max_tokens\": 1500
+            }")
+          AI_REPLY=$(echo "$RESPONSE" | grep -oP '"content":"\K[^"]*' | head -1 || echo "AI思考中，请稍后查看问答记录页面。")
+          echo "::set-output name=reply::$AI_REPLY"
+          echo "::set-output name=model::$SELECTED_MODEL"
+      - name: 保存问答记录
+        env:
+          REPO_NAME: ${{ github.repository }}
+        run: |
+          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+          FILENAME="ai_answers/Q-${TIMESTAMP}.md"
+          echo "# 问题：${{ github.event.client_payload.question }}" > $FILENAME
+          echo "" >> $FILENAME
+          echo "**提问时间：** $(date +'%Y年%m月%d日 %H:%M')" >> $FILENAME
+          echo "**选用模型：** ${{ steps.call_ai.outputs.model }}" >> $FILENAME
+          echo "" >> $FILENAME
+          echo "## 经方助手解答" >> $FILENAME
+          echo "" >> $FILENAME
+          echo "${{ steps.call_ai.outputs.reply }}" >> $FILENAME
+          echo "" >> $FILENAME
+          echo "---" >> $FILENAME
+          echo "*本解答由AI生成，仅供参考学习。*" >> $FILENAME
+          
+          git config --global user.name "GitHub AI Assistant"
+          git config --global user.email "actions@github.com"
+          git add $FILENAME
+          git commit -m "添加AI问答记录：$TIMESTAMP"
+          git push
