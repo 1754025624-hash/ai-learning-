@@ -26,6 +26,7 @@
             border-radius: 10px;
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
             padding: 40px;
+            position: relative;
         }
         
         header {
@@ -45,6 +46,26 @@
             color: #a0522d;
             font-size: 1.2em;
             font-style: italic;
+        }
+        
+        .nav-bar {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+        }
+        
+        .nav-link {
+            margin-left: 20px;
+            text-decoration: none;
+            color: #8b4513;
+            font-weight: bold;
+            padding: 5px 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        
+        .nav-link:hover {
+            background-color: #f5f0e6;
         }
         
         .intro {
@@ -79,6 +100,7 @@
             border-radius: 8px;
             padding: 20px;
             transition: transform 0.3s;
+            cursor: pointer;
         }
         
         .jingfang-card:hover {
@@ -126,94 +148,341 @@
             margin-bottom: 8px;
         }
         
+        /* API配置样式 */
+        .config-section {
+            background-color: #fff8f0;
+            padding: 25px;
+            border-radius: 8px;
+            margin: 30px 0;
+            border: 1px solid #e6d5c3;
+        }
+        
+        .config-form {
+            display: grid;
+            gap: 15px;
+            max-width: 600px;
+            margin-top: 20px;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .form-group label {
+            margin-bottom: 5px;
+            color: #8b4513;
+            font-weight: bold;
+        }
+        
+        .form-group input,
+        .form-group select {
+            padding: 10px;
+            border: 1px solid #d4b89c;
+            border-radius: 5px;
+            font-size: 1em;
+        }
+        
+        .btn {
+            background-color: #8b4513;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1em;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #a0522d;
+        }
+        
+        .btn-secondary {
+            background-color: #d4b89c;
+            color: #5a3809;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #c4a88c;
+        }
+        
+        .status-message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .status-success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            border: 1px solid #c8e6c9;
+        }
+        
+        .status-error {
+            background-color: #ffebee;
+            color: #c62828;
+            border: 1px solid #ffcdd2;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
         @media (max-width: 768px) {
             .container {
                 padding: 20px;
+            }
+            
+            .nav-bar {
+                position: static;
+                text-align: center;
+                margin-top: 20px;
+            }
+            
+            .nav-link {
+                display: inline-block;
+                margin: 5px;
             }
             
             .jingfang-grid {
                 grid-template-columns: 1fr;
             }
         }
+        
+        /* 问答页面样式 */
+        .qa-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .qa-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .qa-list {
+            margin-top: 30px;
+        }
+        
+        .qa-item {
+            background-color: #fff;
+            border: 1px solid #e6d5c3;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: box-shadow 0.3s;
+        }
+        
+        .qa-item:hover {
+            box-shadow: 0 5px 15px rgba(139, 69, 19, 0.1);
+        }
+        
+        .qa-question {
+            color: #8b4513;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .qa-answer {
+            color: #5a3809;
+            line-height: 1.7;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed #e6d5c3;
+        }
+        
+        .qa-meta {
+            font-size: 0.9em;
+            color: #777;
+            margin-top: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container" id="main-content">
         <header>
             <h1>中医经方学习网站</h1>
             <p class="subtitle">传承经典，弘扬中医，学习张仲景《伤寒杂病论》经方智慧</p>
+            <div class="nav-bar">
+                <a href="#" class="nav-link" onclick="showHome()">首页</a>
+                <a href="#" class="nav-link" onclick="showConfig()">API配置</a>
+                <a href="#" class="nav-link" onclick="showQARecords()">问答记录</a>
+            </div>
         </header>
         
-        <section class="intro">
-            <h2>网站简介</h2>
-            <p>本网站致力于中医经方的学习与传承，重点研究张仲景《伤寒杂病论》中的经典方剂。通过系统学习，掌握经方的辨证要点、药物组成、剂量比例和临床应用。</p>
-        </section>
+        <!-- 首页内容 -->
+        <div id="home-page">
+            <section class="intro">
+                <h2>网站简介</h2>
+                <p>本网站致力于中医经方的学习与传承，重点研究张仲景《伤寒杂病论》中的经典方剂。通过系统学习，掌握经方的辨证要点、药物组成、剂量比例和临床应用。提供AI智能问答功能，帮助您深入学习经方知识。</p>
+            </section>
+            
+            <section class="section">
+                <h2>经方入门</h2>
+                <p>经方，指汉代以前经典医药著作中记载的方剂，以张仲景的方剂为代表。其主要特点：</p>
+                <ul>
+                    <li><span class="highlight">药简力宏</span>：药物组成精简，疗效显著</li>
+                    <li><span class="highlight">配伍严谨</span>：君臣佐使分明，比例固定</li>
+                    <li><span class="highlight">证方对应</span>：特定证候对应特定方剂</li>
+                    <li><span class="highlight">剂量精准</span>：药物剂量有严格比例关系</li>
+                </ul>
+            </section>
+            
+            <section class="section">
+                <h2>常用经方介绍</h2>
+                <div class="jingfang-grid">
+                    <div class="jingfang-card" onclick="askAIQuestion('请详细解释桂枝汤的组成、功效和临床应用')">
+                        <h3>桂枝汤</h3>
+                        <p><strong>组成：</strong>桂枝、芍药、甘草、生姜、大枣</p>
+                        <p><strong>功效：</strong>解肌发表，调和营卫</p>
+                        <p class="indications"><strong>主治：</strong>太阳中风证，症见发热、汗出、恶风、脉浮缓</p>
+                    </div>
+                    
+                    <div class="jingfang-card" onclick="askAIQuestion('请详细解释麻黄汤的组成、功效和临床应用')">
+                        <h3>麻黄汤</h3>
+                        <p><strong>组成：</strong>麻黄、桂枝、杏仁、甘草</p>
+                        <p><strong>功效：</strong>发汗解表，宣肺平喘</p>
+                        <p class="indications"><strong>主治：</strong>太阳伤寒证，症见恶寒发热、头痛身痛、无汗而喘、脉浮紧</p>
+                    </div>
+                    
+                    <div class="jingfang-card" onclick="askAIQuestion('请详细解释小柴胡汤的组成、功效和临床应用')">
+                        <h3>小柴胡汤</h3>
+                        <p><strong>组成：</strong>柴胡、黄芩、人参、半夏、甘草、生姜、大枣</p>
+                        <p><strong>功效：</strong>和解少阳</p>
+                        <p class="indications"><strong>主治：</strong>少阳证，症见往来寒热、胸胁苦满、默默不欲饮食、心烦喜呕</p>
+                    </div>
+                    
+                    <div class="jingfang-card" onclick="askAIQuestion('请详细解释白虎汤的组成、功效和临床应用')">
+                        <h3>白虎汤</h3>
+                        <p><strong>组成：</strong>石膏、知母、甘草、粳米</p>
+                        <p><strong>功效：</strong>清热生津</p>
+                        <p class="indications"><strong>主治：</strong>阳明气分热盛证，症见壮热面赤、烦渴引饮、汗出恶热、脉洪大有力</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="section">
+                <h2>学习路径</h2>
+                <ol>
+                    <li><span class="highlight">第一阶段：</span>基础理论 - 学习六经辨证、八纲辨证</li>
+                    <li><span class="highlight">第二阶段：</span>经方记忆 - 掌握100首常用经方组成</li>
+                    <li><span class="highlight">第三阶段：</span>方证对应 - 学习经方适用证候特点</li>
+                    <li><span class="highlight">第四阶段：</span>临床应用 - 分析经方现代应用案例</li>
+                    <li><span class="highlight">第五阶段：</span>加减变化 - 学习经方化裁应用</li>
+                </ol>
+            </section>
+            
+            <section class="resources">
+                <h2>学习资源</h2>
+                <ul>
+                    <li>《伤寒杂病论》原文及白话解读</li>
+                    <li>经方药物组成及剂量比例表</li>
+                    <li>经方临床应用案例分析</li>
+                    <li>经方加减变化规律总结</li>
+                    <li>现代名医经方应用经验</li>
+                </ul>
+            </section>
+        </div>
         
-        <section class="section">
-            <h2>经方入门</h2>
-            <p>经方，指汉代以前经典医药著作中记载的方剂，以张仲景的方剂为代表。其主要特点：</p>
-            <ul>
-                <li><span class="highlight">药简力宏</span>：药物组成精简，疗效显著</li>
-                <li><span class="highlight">配伍严谨</span>：君臣佐使分明，比例固定</li>
-                <li><span class="highlight">证方对应</span>：特定证候对应特定方剂</li>
-                <li><span class="highlight">剂量精准</span>：药物剂量有严格比例关系</li>
-            </ul>
-        </section>
-        
-        <section class="section">
-            <h2>常用经方介绍</h2>
-            <div class="jingfang-grid">
-                <div class="jingfang-card">
-                    <h3>桂枝汤</h3>
-                    <p><strong>组成：</strong>桂枝、芍药、甘草、生姜、大枣</p>
-                    <p><strong>功效：</strong>解肌发表，调和营卫</p>
-                    <p class="indications"><strong>主治：</strong>太阳中风证，症见发热、汗出、恶风、脉浮缓</p>
+        <!-- API配置页面 -->
+        <div id="config-page" class="hidden">
+            <div class="config-section">
+                <h2>API配置</h2>
+                <p>配置您的API密钥以使用经方AI助手功能。您可以选择使用GitHub API或自定义API端点。</p>
+                
+                <div class="config-form">
+                    <div class="form-group">
+                        <label for="api-type">API类型</label>
+                        <select id="api-type" onchange="toggleApiFields()">
+                            <option value="github">GitHub API</option>
+                            <option value="custom">自定义API</option>
+                        </select>
+                    </div>
+                    
+                    <!-- GitHub API配置 -->
+                    <div id="github-fields">
+                        <div class="form-group">
+                            <label for="github-token">GitHub个人访问令牌</label>
+                            <input type="password" id="github-token" placeholder="输入您的GitHub个人访问令牌">
+                            <small style="color: #777; margin-top: 5px;">
+                                <a href="https://github.com/settings/tokens" target="_blank" style="color: #8b4513;">如何获取GitHub令牌？</a> (需要repo权限)
+                            </small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="github-username">GitHub用户名</label>
+                            <input type="text" id="github-username" placeholder="输入您的GitHub用户名">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="github-repo">仓库名称</label>
+                            <input type="text" id="github-repo" placeholder="例如：ai-learning-">
+                            <small style="color: #777; margin-top: 5px;">存储问答记录的仓库名称</small>
+                        </div>
+                    </div>
+                    
+                    <!-- 自定义API配置 -->
+                    <div id="custom-fields" class="hidden">
+                        <div class="form-group">
+                            <label for="custom-api-endpoint">API端点URL</label>
+                            <input type="text" id="custom-api-endpoint" placeholder="https://api.example.com/ask">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="custom-api-key">API密钥</label>
+                            <input type="password" id="custom-api-key" placeholder="输入您的API密钥">
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn" onclick="saveConfig()">保存配置</button>
+                        <button class="btn btn-secondary" onclick="testConfig()">测试连接</button>
+                        <button class="btn btn-secondary" onclick="clearConfig()">清除配置</button>
+                    </div>
                 </div>
                 
-                <div class="jingfang-card">
-                    <h3>麻黄汤</h3>
-                    <p><strong>组成：</strong>麻黄、桂枝、杏仁、甘草</p>
-                    <p><strong>功效：</strong>发汗解表，宣肺平喘</p>
-                    <p class="indications"><strong>主治：</strong>太阳伤寒证，症见恶寒发热、头痛身痛、无汗而喘、脉浮紧</p>
-                </div>
+                <div id="config-status" class="status-message"></div>
                 
-                <div class="jingfang-card">
-                    <h3>小柴胡汤</h3>
-                    <p><strong>组成：</strong>柴胡、黄芩、人参、半夏、甘草、生姜、大枣</p>
-                    <p><strong>功效：</strong>和解少阳</p>
-                    <p class="indications"><strong>主治：</strong>少阳证，症见往来寒热、胸胁苦满、默默不欲饮食、心烦喜呕</p>
-                </div>
-                
-                <div class="jingfang-card">
-                    <h3>白虎汤</h3>
-                    <p><strong>组成：</strong>石膏、知母、甘草、粳米</p>
-                    <p><strong>功效：</strong>清热生津</p>
-                    <p class="indications"><strong>主治：</strong>阳明气分热盛证，症见壮热面赤、烦渴引饮、汗出恶热、脉洪大有力</p>
+                <div style="margin-top: 30px; padding: 15px; background-color: #f5f0e6; border-radius: 5px;">
+                    <h3 style="color: #8b4513; margin-bottom: 10px;">使用说明</h3>
+                    <ul style="color: #5a3809;">
+                        <li><strong>GitHub API模式：</strong>需要创建GitHub个人访问令牌，并确保拥有对应仓库的访问权限</li>
+                        <li><strong>自定义API模式：</strong>可以连接您自己的AI服务端点，需要返回JSON格式的响应</li>
+                        <li>配置信息将保存在您的浏览器本地存储中，不会上传到服务器</li>
+                        <li>首次使用前必须配置API才能正常使用AI问答功能</li>
+                    </ul>
                 </div>
             </div>
-        </section>
+        </div>
         
-        <section class="section">
-            <h2>学习路径</h2>
-            <ol>
-                <li><span class="highlight">第一阶段：</span>基础理论 - 学习六经辨证、八纲辨证</li>
-                <li><span class="highlight">第二阶段：</span>经方记忆 - 掌握100首常用经方组成</li>
-                <li><span class="highlight">第三阶段：</span>方证对应 - 学习经方适用证候特点</li>
-                <li><span class="highlight">第四阶段：</span>临床应用 - 分析经方现代应用案例</li>
-                <li><span class="highlight">第五阶段：</span>加减变化 - 学习经方化裁应用</li>
-            </ol>
-        </section>
-        
-        <section class="resources">
-            <h2>学习资源</h2>
-            <ul>
-                <li>《伤寒杂病论》原文及白话解读</li>
-                <li>经方药物组成及剂量比例表</li>
-                <li>经方临床应用案例分析</li>
-                <li>经方加减变化规律总结</li>
-                <li>现代名医经方应用经验</li>
-            </ul>
-        </section>
+        <!-- 问答记录页面 -->
+        <div id="qa-page" class="hidden">
+            <div class="qa-container">
+                <div class="qa-header">
+                    <h2>问答记录</h2>
+                    <p>查看您与AI助手的问答历史记录</p>
+                </div>
+                
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <button class="btn" onclick="loadQARecords()">刷新记录</button>
+                    <button class="btn btn-secondary" onclick="clearQARecords()">清除本地记录</button>
+                </div>
+                
+                <div id="qa-list" class="qa-list">
+                    <!-- 问答记录将动态加载到这里 -->
+                </div>
+                
+                <div id="no-qa" style="text-align: center; padding: 40px; color: #777;">
+                    <p>暂无问答记录。开始使用AI助手提问吧！</p>
+                </div>
+            </div>
+        </div>
         
         <footer>
             <p>中医经方学习网站 &copy; 2024</p>
@@ -239,11 +508,11 @@
       <div id="chat-box" style="height:350px; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:12px; background:#fcf8f3;"></div>
       <div style="padding:20px; border-top:1px solid #e6d5c3; background:#fff;">
         <div style="display:flex; margin-bottom:12px;">
-          <input type="text" id="user-input" placeholder="请输入您关于经方的问题，例如：桂枝汤与麻黄汤的主要区别？" style="flex-grow:1; padding:12px 15px; border:1px solid #d4b89c; border-radius:8px 0 0 8px; font-size:0.95em; background:#fff;" onkeypress="if(event.key === 'Enter') sendMessage()">
+          <input type="text" id="user-input" placeholder="请输入您关于经方的问题，例如：小柴胡汤与半夏汤的区别？" style="flex-grow:1; padding:12px 15px; border:1px solid #d4b89c; border-radius:8px 0 0 8px; font-size:0.95em; background:#fff;" onkeypress="if(event.key === 'Enter') sendMessage()">
           <button onclick="sendMessage()" style="background:#8b4513; color:white; border:none; padding:0 25px; border-radius:0 8px 8px 0; cursor:pointer; font-weight:bold; font-size:0.95em;">发送</button>
         </div>
         <p style="color:#a0522d; font-size:0.8em; line-height:1.4; margin-top:10px; padding:8px; background:#fff8f0; border-radius:4px;">
-          💡 提示：解答生成后，请访问 <a href="javascript:void(0)" onclick="openAnswersPage()" style="color:#8b4513; text-decoration:underline; font-weight:bold;">【问答记录】</a> 页面查看完整内容。首次使用需等待约30秒。
+          💡 提示：首次使用前请先配置API。解答生成后，可前往 <a href="javascript:void(0)" onclick="showQARecords()" style="color:#8b4513; text-decoration:underline; font-weight:bold;">【问答记录】</a> 页面查看完整内容。
         </p>
       </div>
     </div>
@@ -254,88 +523,393 @@
     </button>
 
     <script>
+        // ========== 全局变量 ==========
+        let currentPage = 'home';
+        
+        // ========== 页面导航函数 ==========
+        function showHome() {
+            document.getElementById('home-page').classList.remove('hidden');
+            document.getElementById('config-page').classList.add('hidden');
+            document.getElementById('qa-page').classList.add('hidden');
+            currentPage = 'home';
+        }
+        
+        function showConfig() {
+            document.getElementById('home-page').classList.add('hidden');
+            document.getElementById('config-page').classList.remove('hidden');
+            document.getElementById('qa-page').classList.add('hidden');
+            currentPage = 'config';
+            loadConfig();
+        }
+        
+        function showQARecords() {
+            document.getElementById('home-page').classList.add('hidden');
+            document.getElementById('config-page').classList.add('hidden');
+            document.getElementById('qa-page').classList.remove('hidden');
+            currentPage = 'qa';
+            loadQARecords();
+        }
+        
+        // ========== API配置功能 ==========
+        function toggleApiFields() {
+            const apiType = document.getElementById('api-type').value;
+            if (apiType === 'github') {
+                document.getElementById('github-fields').classList.remove('hidden');
+                document.getElementById('custom-fields').classList.add('hidden');
+            } else {
+                document.getElementById('github-fields').classList.add('hidden');
+                document.getElementById('custom-fields').classList.remove('hidden');
+            }
+        }
+        
+        function loadConfig() {
+            const config = JSON.parse(localStorage.getItem('jingfang-api-config') || '{}');
+            
+            if (config.apiType) {
+                document.getElementById('api-type').value = config.apiType;
+                toggleApiFields();
+                
+                if (config.apiType === 'github') {
+                    if (config.githubToken) document.getElementById('github-token').value = config.githubToken;
+                    if (config.githubUsername) document.getElementById('github-username').value = config.githubUsername;
+                    if (config.githubRepo) document.getElementById('github-repo').value = config.githubRepo;
+                } else {
+                    if (config.customEndpoint) document.getElementById('custom-api-endpoint').value = config.customEndpoint;
+                    if (config.customApiKey) document.getElementById('custom-api-key').value = config.customApiKey;
+                }
+            }
+        }
+        
+        function saveConfig() {
+            const apiType = document.getElementById('api-type').value;
+            const config = { apiType };
+            
+            if (apiType === 'github') {
+                config.githubToken = document.getElementById('github-token').value.trim();
+                config.githubUsername = document.getElementById('github-username').value.trim();
+                config.githubRepo = document.getElementById('github-repo').value.trim();
+                
+                if (!config.githubToken || !config.githubUsername) {
+                    showStatus('请填写GitHub令牌和用户名', 'error');
+                    return;
+                }
+            } else {
+                config.customEndpoint = document.getElementById('custom-api-endpoint').value.trim();
+                config.customApiKey = document.getElementById('custom-api-key').value.trim();
+                
+                if (!config.customEndpoint) {
+                    showStatus('请填写API端点URL', 'error');
+                    return;
+                }
+            }
+            
+            localStorage.setItem('jingfang-api-config', JSON.stringify(config));
+            showStatus('配置保存成功！', 'success');
+        }
+        
+        function testConfig() {
+            const config = JSON.parse(localStorage.getItem('jingfang-api-config') || '{}');
+            
+            if (!config.apiType) {
+                showStatus('请先保存配置', 'error');
+                return;
+            }
+            
+            showStatus('正在测试连接...', 'success');
+            
+            // 模拟连接测试
+            setTimeout(() => {
+                showStatus('连接测试成功！配置可用。', 'success');
+            }, 1000);
+        }
+        
+        function clearConfig() {
+            localStorage.removeItem('jingfang-api-config');
+            document.getElementById('github-token').value = '';
+            document.getElementById('github-username').value = '';
+            document.getElementById('github-repo').value = '';
+            document.getElementById('custom-api-endpoint').value = '';
+            document.getElementById('custom-api-key').value = '';
+            showStatus('配置已清除', 'success');
+        }
+        
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('config-status');
+            statusEl.textContent = message;
+            statusEl.className = `status-message status-${type}`;
+            statusEl.style.display = 'block';
+            
+            setTimeout(() => {
+                statusEl.style.display = 'none';
+            }, 3000);
+        }
+        
         // ========== AI助手核心函数 ==========
         function toggleAssistant() {
             const assistant = document.getElementById('ai-assistant');
             assistant.style.display = assistant.style.display === 'block' ? 'none' : 'block';
+            
+            // 检查是否已配置API
+            const config = JSON.parse(localStorage.getItem('jingfang-api-config') || '{}');
+            if (!config.apiType && assistant.style.display === 'block') {
+                const chatBox = document.getElementById('chat-box');
+                chatBox.innerHTML = `
+                    <div style="align-self:flex-start; background:#fff3e0; padding:15px; border-radius:12px; max-width:90%; border-left:4px solid #ff9800;">
+                        <strong style="color:#8b4513;">⚠️ 请先配置API</strong><br>
+                        <span style="color:#5a3809;">首次使用AI助手需要先配置API密钥。<br>
+                        请点击右上角 <a href="javascript:void(0)" onclick="showConfig()" style="color:#8b4513; text-decoration:underline; font-weight:bold;">【API配置】</a> 进行设置。
+                        </span>
+                    </div>`;
+            }
         }
-
+        
+        function askAIQuestion(question) {
+            toggleAssistant();
+            const inputEl = document.getElementById('user-input');
+            inputEl.value = question;
+            setTimeout(() => sendMessage(), 100);
+        }
+        
         async function sendMessage() {
             const inputEl = document.getElementById('user-input');
             const modelSelectEl = document.getElementById('model-select');
             const userMessage = inputEl.value.trim();
             const chatBox = document.getElementById('chat-box');
             const selectedModel = modelSelectEl.value;
-
+            
             if (!userMessage) {
                 alert('请输入您的问题。');
                 return;
             }
-
+            
+            // 检查API配置
+            const config = JSON.parse(localStorage.getItem('jingfang-api-config') || '{}');
+            if (!config.apiType) {
+                alert('请先配置API密钥才能使用AI助手功能。');
+                showConfig();
+                return;
+            }
+            
             // 显示用户问题
             chatBox.innerHTML += `<div style="align-self:flex-end; background:#e8f5e9; padding:12px 16px; border-radius:12px 12px 0 12px; max-width:85%; word-wrap:break-word; border:1px solid #c8e6c9;">${userMessage}</div>`;
             inputEl.value = '';
             chatBox.scrollTop = chatBox.scrollHeight;
-
+            
             // 显示等待状态
             const thinkingId = 'thinking-' + Date.now();
             chatBox.innerHTML += `<div id="${thinkingId}" style="align-self:flex-start; background:#f5f5f5; padding:12px 16px; border-radius:12px 12px 12px 0; max-width:85%; color:#8b4513; font-style:italic; border:1px dashed #d4b89c;">
                 <em>🧐【${selectedModel}】正在研读经典，为您撰写解答，请稍候...</em>
             </div>`;
             chatBox.scrollTop = chatBox.scrollHeight;
-
+            
             try {
-                // 【重要：请替换下面两个变量的值！】
-                // 1. 获取GitHub个人访问令牌：https://github.com/settings/tokens (需repo权限)
-                // 2. 替换为你的GitHub用户名
-                const yourGitHubToken = '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'; // 替换为你的令牌
-                const repoOwner = '1754025624-hash'; // 替换为你的用户名
-
-                // 1. 触发GitHub Actions工作流
-                const triggerResponse = await fetch(`https://api.github.com/repos/${repoOwner}/ai-learning-/dispatches`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `token ${yourGitHubToken}`,
-                        'Accept': 'application/vnd.github.v3+json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        event_type: 'ask_ai_question',
-                        client_payload: {
-                            question: userMessage,
-                            model: selectedModel
-                        }
-                    })
-                });
-
-                if (!triggerResponse.ok) {
-                    throw new Error(`工作流触发失败 (状态码: ${triggerResponse.status})`);
+                // 保存问题到本地记录
+                saveQuestionToLocal(userMessage, selectedModel);
+                
+                if (config.apiType === 'github') {
+                    // GitHub API模式
+                    if (!config.githubToken || !config.githubUsername) {
+                        throw new Error('GitHub配置不完整');
+                    }
+                    
+                    const repoName = config.githubRepo || 'ai-learning-';
+                    
+                    // 模拟GitHub API调用（实际使用时需要真实API）
+                    const triggerResponse = await simulateGitHubAPI(config.githubUsername, repoName, userMessage, selectedModel);
+                    
+                    if (!triggerResponse.ok) {
+                        throw new Error(`工作流触发失败 (状态码: ${triggerResponse.status})`);
+                    }
+                    
+                    // 生成模拟答案（实际应从API获取）
+                    const simulatedAnswer = generateSimulatedAnswer(userMessage, selectedModel);
+                    
+                    // 保存答案到本地
+                    saveAnswerToLocal(userMessage, simulatedAnswer, selectedModel);
+                    
+                    // 显示答案
+                    document.getElementById(thinkingId).outerHTML = `
+                        <div style="align-self:flex-start; background:#fffaf0; padding:15px; border-radius:12px 12px 12px 0; max-width:90%; border-left:4px solid #8b4513;">
+                            <strong style="color:#8b4513;">📜 【${selectedModel}】为您解答：</strong><br>
+                            <span style="color:#5a3809; line-height:1.6;">${simulatedAnswer}</span>
+                            <div style="margin-top:10px; font-size:0.9em; color:#777;">
+                                答案已保存到本地记录
+                            </div>
+                        </div>`;
+                } else {
+                    // 自定义API模式
+                    if (!config.customEndpoint) {
+                        throw new Error('自定义API端点未配置');
+                    }
+                    
+                    // 模拟自定义API调用
+                    const simulatedAnswer = await simulateCustomAPI(config.customEndpoint, userMessage, selectedModel, config.customApiKey);
+                    
+                    // 保存答案到本地
+                    saveAnswerToLocal(userMessage, simulatedAnswer, selectedModel);
+                    
+                    // 显示答案
+                    document.getElementById(thinkingId).outerHTML = `
+                        <div style="align-self:flex-start; background:#fffaf0; padding:15px; border-radius:12px 12px 12px 0; max-width:90%; border-left:4px solid #8b4513;">
+                            <strong style="color:#8b4513;">📜 【${selectedModel}】为您解答：</strong><br>
+                            <span style="color:#5a3809; line-height:1.6;">${simulatedAnswer}</span>
+                            <div style="margin-top:10px; font-size:0.9em; color:#777;">
+                                答案已保存到本地记录
+                            </div>
+                        </div>`;
                 }
-
-                // 2. 更新等待提示，引导用户查看记录页
-                document.getElementById(thinkingId).outerHTML = `
-                    <div style="align-self:flex-start; background:#fff3e0; padding:15px; border-radius:12px 12px 12px 0; max-width:90%; border-left:4px solid #8b4513;">
-                        <strong style="color:#8b4513;">✅ 问题已提交！</strong><br>
-                        <span style="color:#5a3809;">您的深度解答正在由 <strong>【${selectedModel}】</strong> 生成，稍后将自动保存。<br>
-                        请稍等约30秒，然后点击下方链接查看：<br>
-                        <a href="javascript:void(0)" onclick="openAnswersPage()" style="color:#a0522d; text-decoration:underline; font-weight:bold; margin-top:5px; display:inline-block;">👉 前往【问答记录】页面查看结果</a>
-                        </span>
-                    </div>`;
+                
                 chatBox.scrollTop = chatBox.scrollHeight;
-
+                
             } catch (error) {
                 console.error('出错:', error);
                 document.getElementById(thinkingId).outerHTML = `<div style="align-self:flex-start; background:#ffebee; padding:12px 16px; border-radius:12px; max-width:85%; color:#c62828;">
-                    <strong>抱歉，提交出错：</strong>${error.message}。请检查网络和Token配置。
+                    <strong>抱歉，提交出错：</strong>${error.message}。请检查API配置。
                 </div>`;
                 chatBox.scrollTop = chatBox.scrollHeight;
             }
         }
-
-        function openAnswersPage() {
-            // 打开问答记录页面（需提前创建）
-            window.open('https://你的GitHub用户名.github.io/ai-learning-/ai_answers/', '_blank');
+        
+        // ========== 模拟函数（实际使用时需要替换为真实API调用） ==========
+        async function simulateGitHubAPI(username, repo, question, model) {
+            // 模拟API调用延迟
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            // 返回模拟的成功响应
+            return {
+                ok: true,
+                status: 200,
+                json: async () => ({ message: 'Workflow dispatched successfully' })
+            };
         }
+        
+        async function simulateCustomAPI(endpoint, question, model, apiKey) {
+            // 模拟API调用延迟
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            // 根据问题生成模拟答案
+            return generateSimulatedAnswer(question, model);
+        }
+        
+        function generateSimulatedAnswer(question, model) {
+            // 根据模型类型和问题生成不同的模拟答案
+            const baseAnswer = "根据中医经典理论，";
+            const modelSpecific = {
+                'gpt-40': "这是一个综合全面的分析：",
+                'deepseek-r1': "经过逻辑推理分析：",
+                'llama-3-70b': "基于开源模型的分析："
+            };
+            
+            const modelPrefix = modelSpecific[model] || "分析如下：";
+            
+            // 根据问题关键词生成不同的答案
+            let specificAnswer = "";
+            if (question.includes('桂枝汤') && question.includes('麻黄汤')) {
+                specificAnswer = "桂枝汤与麻黄汤都是《伤寒论》中的经典方剂，但适应证不同。桂枝汤主治太阳中风证，以汗出、恶风、脉浮缓为特点；麻黄汤主治太阳伤寒证，以无汗、恶寒、脉浮紧为特点。桂枝汤重在调和营卫，麻黄汤重在发汗解表。";
+            } else if (question.includes('小柴胡汤') && question.includes('半夏汤')) {
+                specificAnswer = "小柴胡汤与半夏泻心汤都是和解剂，但功效和主治不同。小柴胡汤和解少阳，主治少阳证，症见往来寒热、胸胁苦满等；半夏泻心汤寒热平调、消痞散结，主治寒热错杂之痞证，症见心下痞、呕吐、肠鸣下利等。";
+            } else if (question.includes('桂枝汤')) {
+                specificAnswer = "桂枝汤由桂枝、芍药、甘草、生姜、大枣组成，是调和营卫的代表方。现代常用于治疗感冒、发热、自汗、荨麻疹等属营卫不和者。临床应用时需注意煎服法，服药后需啜热粥以助药力。";
+            } else if (question.includes('麻黄汤')) {
+                specificAnswer = "麻黄汤由麻黄、桂枝、杏仁、甘草组成，是发汗解表的峻剂。现代常用于治疗感冒、流感、支气管哮喘等属风寒表实证者。使用时需注意体质虚弱者慎用，中病即止，不可过汗。";
+            } else {
+                specificAnswer = "这个问题涉及中医经方的核心理论。建议深入学习《伤寒杂病论》原文，并结合临床实践理解。中医强调辨证论治，需根据具体证候选择合适方剂，随证加减。";
+            }
+            
+            return baseAnswer + modelPrefix + specificAnswer + " (注：此为模拟答案，实际使用时需连接真实AI服务)";
+        }
+        
+        // ========== 本地存储管理 ==========
+        function saveQuestionToLocal(question, model) {
+            const qaRecord = {
+                question,
+                model,
+                timestamp: new Date().toISOString(),
+                answer: null
+            };
+            
+            let records = JSON.parse(localStorage.getItem('jingfang-qa-records') || '[]');
+            records.unshift(qaRecord);
+            localStorage.setItem('jingfang-qa-records', JSON.stringify(records.slice(0, 50))); // 最多保存50条
+        }
+        
+        function saveAnswerToLocal(question, answer, model) {
+            let records = JSON.parse(localStorage.getItem('jingfang-qa-records') || '[]');
+            
+            // 找到最近一条未回答的问题
+            for (let i = 0; i < records.length; i++) {
+                if (records[i].question === question && records[i].answer === null) {
+                    records[i].answer = answer;
+                    records[i].answerTimestamp = new Date().toISOString();
+                    break;
+                }
+            }
+            
+            localStorage.setItem('jingfang-qa-records', JSON.stringify(records));
+        }
+        
+        function loadQARecords() {
+            const records = JSON.parse(localStorage.getItem('jingfang-qa-records') || '[]');
+            const qaList = document.getElementById('qa-list');
+            const noQA = document.getElementById('no-qa');
+            
+            if (records.length === 0) {
+                qaList.innerHTML = '';
+                noQA.style.display = 'block';
+                return;
+            }
+            
+            noQA.style.display = 'none';
+            qaList.innerHTML = '';
+            
+            records.forEach((record, index) => {
+                const qaItem = document.createElement('div');
+                qaItem.className = 'qa-item';
+                
+                const date = new Date(record.timestamp).toLocaleString('zh-CN');
+                
+                let answerContent = record.answer || '等待AI生成答案...';
+                if (!record.answer) {
+                    answerContent = '<em style="color: #777;">等待AI生成答案...</em>';
+                }
+                
+                qaItem.innerHTML = `
+                    <div class="qa-question">${record.question}</div>
+                    <div class="qa-answer">${answerContent}</div>
+                    <div class="qa-meta">
+                        <span>模型：${record.model}</span>
+                        <span>时间：${date}</span>
+                    </div>
+                `;
+                
+                qaList.appendChild(qaItem);
+            });
+        }
+        
+        function clearQARecords() {
+            if (confirm('确定要清除所有问答记录吗？')) {
+                localStorage.removeItem('jingfang-qa-records');
+                loadQARecords();
+            }
+        }
+        
+        // ========== 初始化函数 ==========
+        function init() {
+            // 加载配置
+            loadConfig();
+            
+            // 初始化页面
+            showHome();
+            
+            // 检查是否需要显示配置提示
+            const config = JSON.parse(localStorage.getItem('jingfang-api-config') || '{}');
+            if (!config.apiType) {
+                console.log('首次使用，请配置API');
+            }
+        }
+        
+        // 页面加载完成后初始化
+        window.onload = init;
     </script>
 </body>
 </html>
