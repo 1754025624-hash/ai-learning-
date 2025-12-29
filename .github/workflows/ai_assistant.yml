@@ -11,50 +11,290 @@ jobs:
   answer:
     runs-on: ubuntu-latest
     steps:
+      - name: 检出仓库
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          
       - name: 准备环境
         run: |
           mkdir -p ai_answers
-      - name: 调用GitHub AI模型
-        id: call_ai
+          echo "环境准备完成"
+          
+      - name: 解析用户问题
+        id: parse-question
         env:
           USER_QUESTION: ${{ github.event.client_payload.question }}
-          SELECTED_MODEL: ${{ github.event.client_payload.model || 'gpt-4o' }}
+          SELECTED_MODEL: ${{ github.event.client_payload.model || 'gpt-4' }}
         run: |
-          RESPONSE=$(curl -s -X POST https://models.inference.ai.azure.com/v1/chat/completions \
-            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            -H "Content-Type: application/json" \
-            -d "{
-              \"model\": \"$SELECTED_MODEL\",
-              \"messages\": [
-                {\"role\": \"system\", \"content\": \"你是精通《伤寒杂病论》的国医大师。回答需：1.引用经典原文 2.解释方药组成与配伍 3.分析适用证候 4.给出现代应用建议。语言需严谨而亲切。\"},
-                {\"role\": \"user\", \"content\": \"$USER_QUESTION\"}
-              ],
-              \"temperature\": 0.7,
-              \"max_tokens\": 1500
-            }")
-          AI_REPLY=$(echo "$RESPONSE" | grep -oP '"content":"\K[^"]*' | head -1 || echo "AI思考中，请稍后查看问答记录页面。")
-          echo "::set-output name=reply::$AI_REPLY"
-          echo "::set-output name=model::$SELECTED_MODEL"
-      - name: 保存问答记录
+          echo "用户问题: $USER_QUESTION"
+          echo "选择模型: $SELECTED_MODEL"
+          echo "question=$USER_QUESTION" >> $GITHUB_OUTPUT
+          echo "model=$SELECTED_MODEL" >> $GITHUB_OUTPUT
+          
+      - name: 调用AI模型生成回答
+        id: generate-answer
         env:
-          REPO_NAME: ${{ github.repository }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: |
+          # 根据选择的模型调用不同的API
+          MODEL="${{ steps.parse-question.outputs.model }}"
+          QUESTION="${{ steps.parse-question.outputs.question }}"
+          
+          echo "正在使用模型: $MODEL 生成回答..."
+          
+          # 如果没有配置API密钥，使用模拟回答
+          if [ -z "$OPENAI_API_KEY" ] && [ -z "$ANTHROPIC_API_KEY" ] && [ -z "$DEEPSEEK_API_KEY" ]; then
+            echo "未检测到API密钥，生成模拟回答"
+            ANSWER="## 模拟回答（实际使用时需要配置API密钥）
+            
+            您好！由于当前未配置AI服务的API密钥，我将为您提供一个基于中医经典理论的示例回答。
+
+            对于您的问题：**${QUESTION}**
+
+            ### 1. 经典原文参考
+            根据《伤寒论》和《金匮要略》的相关记载...
+
+            ### 2. 方药组成与配伍分析
+            经典经方通常注重君臣佐使的配伍原则...
+
+            ### 3. 适用证候分析
+            该方剂适用于典型的...证候，表现为...
+
+            ### 4. 现代应用建议
+            现代临床中，可以应用于...病症，常用剂量为...
+
+            ### 使用说明
+            请配置以下任意API密钥以获取真实AI回答：
+            1. OpenAI API密钥 (用于GPT-4/GPT-4o)
+            2. Anthropic API密钥 (用于Claude)
+            3. DeepSeek API密钥 (用于DeepSeek-R1)
+
+            在GitHub仓库的Settings → Secrets中配置对应密钥即可。"
+            
+            echo "reply=$ANSWER" >> $GITHUB_OUTPUT
+            echo "model=$MODEL" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # 根据模型选择调用不同的API
+          case $MODEL in
+            gpt-4|gpt-4o|gpt-3.5-turbo)
+              if [ -z "$OPENAI_API_KEY" ]; then
+                echo "未找到OpenAI API密钥"
+                exit 1
+              fi
+              
+              # 调用OpenAI API
+              RESPONSE=$(curl -s -X POST "https://api.openai.com/v1/chat/completions" \
+                -H "Authorization: Bearer $OPENAI_API_KEY" \
+                -H "Content-Type: application/json" \
+                -d "{
+                  \"model\": \"$MODEL\",
+                  \"messages\": [
+                    {\"role\": \"system\", \"content\": \"你是精通《伤寒杂病论》的国医大师，专长于中医经方研究。请按照以下要求回答问题：1.引用相关经典原文 2.详细解释方药组成与配伍原理 3.分析适用证候特点 4.给出现代临床应用建议。语言风格需严谨专业且亲切易懂。\"},
+                    {\"role\": \"user\", \"content\": \"$QUESTION\"}
+                  ],
+                  \"temperature\": 0.7,
+                  \"max_tokens\": 2000
+                }")
+              
+              ANSWER=$(echo "$RESPONSE" | python3 -c "
+import sys, json
+try:
+    data = json.load(sys.stdin)
+    content = data['choices'][0]['message']['content']
+    # 处理转义字符
+    import re
+    content = re.sub(r'\\\\\"', '\"', content)
+    print(content)
+except:
+    print('抱歉，AI服务暂时不可用，请稍后重试。')
+")
+              ;;
+              
+            deepseek-r1|deepseek-chat)
+              if [ -z "$DEEPSEEK_API_KEY" ]; then
+                echo "未找到DeepSeek API密钥"
+                exit 1
+              fi
+              
+              # 调用DeepSeek API
+              RESPONSE=$(curl -s -X POST "https://api.deepseek.com/v1/chat/completions" \
+                -H "Authorization: Bearer $DEEPSEEK_API_KEY" \
+                -H "Content-Type: application/json" \
+                -d "{
+                  \"model\": \"deepseek-chat\",
+                  \"messages\": [
+                    {\"role\": \"system\", \"content\": \"你是精通《伤寒杂病论》的国医大师，专长于中医经方研究。请按照以下要求回答问题：1.引用相关经典原文 2.详细解释方药组成与配伍原理 3.分析适用证候特点 4.给出现代临床应用建议。语言风格需严谨专业且亲切易懂。\"},
+                    {\"role\": \"user\", \"content\": \"$QUESTION\"}
+                  ],
+                  \"temperature\": 0.7,
+                  \"max_tokens\": 2000
+                }")
+              
+              ANSWER=$(echo "$RESPONSE" | python3 -c "
+import sys, json
+try:
+    data = json.load(sys.stdin)
+    content = data['choices'][0]['message']['content']
+    print(content)
+except:
+    print('抱歉，DeepSeek服务暂时不可用，请稍后重试。')
+")
+              ;;
+              
+            claude-*)
+              if [ -z "$ANTHROPIC_API_KEY" ]; then
+                echo "未找到Anthropic API密钥"
+                exit 1
+              fi
+              
+              # 调用Claude API
+              RESPONSE=$(curl -s -X POST "https://api.anthropic.com/v1/messages" \
+                -H "x-api-key: $ANTHROPIC_API_KEY" \
+                -H "anthropic-version: 2023-06-01" \
+                -H "Content-Type: application/json" \
+                -d "{
+                  \"model\": \"$MODEL\",
+                  \"max_tokens\": 2000,
+                  \"system\": \"你是精通《伤寒杂病论》的国医大师，专长于中医经方研究。请按照以下要求回答问题：1.引用相关经典原文 2.详细解释方药组成与配伍原理 3.分析适用证候特点 4.给出现代临床应用建议。语言风格需严谨专业且亲切易懂。\",
+                  \"messages\": [
+                    {\"role\": \"user\", \"content\": \"$QUESTION\"}
+                  ]
+                }")
+              
+              ANSWER=$(echo "$RESPONSE" | python3 -c "
+import sys, json
+try:
+    data = json.load(sys.stdin)
+    content = data['content'][0]['text']
+    print(content)
+except:
+    print('抱歉，Claude服务暂时不可用，请稍后重试。')
+")
+              ;;
+              
+            *)
+              # 默认使用模拟回答
+              ANSWER="## 关于您的问题：${QUESTION}
+              
+              由于您选择的模型($MODEL)暂未配置相应API，我将为您提供一个通用的经方学习参考：
+
+              ### 中医经方学习要点：
+              1. **方证对应**：每个经方都有其特定的证候表现
+              2. **配伍规律**：君臣佐使的配伍原则是经方核心
+              3. **剂量比例**：经典方剂的药物比例需要严格遵守
+              4. **煎服方法**：不同的煎服方法会影响疗效
+
+              ### 建议：
+              1. 系统学习《伤寒论》六经辨证体系
+              2. 掌握常用50首经方的组成和主治
+              3. 结合现代临床案例理解经方应用
+              4. 注意经方与时方的区别与联系
+
+              ---
+              *如需使用特定AI模型，请在网站配置中添加对应的API密钥。*"
+              ;;
+          esac
+          
+          echo "reply=$ANSWER" >> $GITHUB_OUTPUT
+          echo "model=$MODEL" >> $GITHUB_OUTPUT
+          
+      - name: 生成问答记录文件
         run: |
           TIMESTAMP=$(date +%Y%m%d-%H%M%S)
           FILENAME="ai_answers/Q-${TIMESTAMP}.md"
-          echo "# 问题：${{ github.event.client_payload.question }}" > $FILENAME
+          
+          echo "# 问题：${{ steps.parse-question.outputs.question }}" > $FILENAME
           echo "" >> $FILENAME
-          echo "**提问时间：** $(date +'%Y年%m月%d日 %H:%M')" >> $FILENAME
-          echo "**选用模型：** ${{ steps.call_ai.outputs.model }}" >> $FILENAME
+          echo "**提问时间：** $(date +'%Y年%m月%d日 %H:%M:%S')" >> $FILENAME
+          echo "**选用模型：** ${{ steps.generate-answer.outputs.model }}" >> $FILENAME
+          echo "**处理状态：** ✅ 已完成" >> $FILENAME
           echo "" >> $FILENAME
-          echo "## 经方助手解答" >> $FILENAME
+          echo "## 📜 经方助手解答" >> $FILENAME
           echo "" >> $FILENAME
-          echo "${{ steps.call_ai.outputs.reply }}" >> $FILENAME
+          
+          # 处理回答内容，确保正确格式
+          REPLY="${{ steps.generate-answer.outputs.reply }}"
+          # 替换变量中的换行符
+          echo "$REPLY" | sed 's/\\n/\n/g' >> $FILENAME
+          
           echo "" >> $FILENAME
           echo "---" >> $FILENAME
-          echo "*本解答由AI生成，仅供参考学习。*" >> $FILENAME
+          echo "" >> $FILENAME
+          echo "### 📋 学习要点" >> $FILENAME
+          echo "" >> $FILENAME
+          echo "1. **经典原文**：建议查阅《伤寒论》相关原文加深理解" >> $FILENAME
+          echo "2. **临床辨证**：注意方证对应的核心症状" >> $FILENAME
+          echo "3. **现代应用**：在医师指导下参考使用" >> $FILENAME
+          echo "4. **学习建议**：建立个人经方学习笔记" >> $FILENAME
+          echo "" >> $FILENAME
+          echo "*本解答由AI生成，仅供参考学习。临床应用请咨询专业中医师。*" >> $FILENAME
           
+          echo "已生成文件: $FILENAME"
+          
+      - name: 提交到GitHub
+        run: |
           git config --global user.name "GitHub AI Assistant"
           git config --global user.email "actions@github.com"
-          git add $FILENAME
-          git commit -m "添加AI问答记录：$TIMESTAMP"
-          git push
+          
+          # 检查是否有变更
+          if git diff --quiet HEAD -- ai_answers/; then
+            echo "没有新的变更需要提交"
+          else
+            git add ai_answers/
+            git commit -m "添加AI问答记录：$(date +%Y%m%d-%H%M%S)
+问题：${{ steps.parse-question.outputs.question }}"
+            git push origin HEAD:${{ github.ref }}
+            echo "已成功提交到GitHub"
+          fi
+          
+      - name: 生成索引文件
+        run: |
+          # 生成所有问答的索引文件
+          INDEX_FILE="ai_answers/README.md"
+          
+          echo "# 📚 AI问答记录索引" > $INDEX_FILE
+          echo "" >> $INDEX_FILE
+          echo "> 最后更新：$(date +'%Y年%m月%d日 %H:%M:%S')" >> $INDEX_FILE
+          echo "" >> $INDEX_FILE
+          echo "## 最新问答" >> $INDEX_FILE
+          echo "" >> $INDEX_FILE
+          
+          # 按时间倒序排列，显示最新的20个文件
+          find ai_answers -name "Q-*.md" -type f | sort -r | head -20 | while read file; do
+            FILENAME=$(basename "$file")
+            DATETIME=$(echo "$FILENAME" | sed 's/Q-\(....\)\(..\)\(..\)-\(..\)\(..\)\(..\)\.md/\1年\2月\3日 \4:\5:\6/')
+            QUESTION=$(head -1 "$file" | sed 's/# 问题：//')
+            
+            echo "### [${DATETIME}](${FILENAME})" >> $INDEX_FILE
+            echo "" >> $INDEX_FILE
+            echo "**问题：** ${QUESTION}" >> $INDEX_FILE
+            echo "" >> $INDEX_FILE
+            echo "[查看完整回答](${FILENAME})" >> $INDEX_FILE
+            echo "" >> $INDEX_FILE
+            echo "---" >> $INDEX_FILE
+            echo "" >> $INDEX_FILE
+          done
+          
+          echo "" >> $INDEX_FILE
+          echo "## 使用说明" >> $INDEX_FILE
+          echo "" >> $INDEX_FILE
+          echo "1. 每个问答都保存为独立的Markdown文件" >> $INDEX_FILE
+          echo "2. 文件名格式：Q-YYYYMMDD-HHMMSS.md" >> $INDEX_FILE
+          echo "3. 点击上方链接查看完整内容" >> $INDEX_FILE
+          echo "4. 所有记录都保存在这个目录中" >> $INDEX_FILE
+          
+          # 提交索引文件
+          git add "$INDEX_FILE"
+          git commit -m "更新问答记录索引" || echo "没有索引变更"
+          git push origin HEAD:${{ github.ref }} || echo "推送失败或无需推送"
+          
+      - name: 完成通知
+        run: |
+          echo "🎉 AI问答处理完成！"
+          echo "问答记录已保存到：ai_answers/ 目录"
+          echo "您可以在网站中查看完整的问答记录"
