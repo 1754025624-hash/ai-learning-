@@ -176,11 +176,17 @@
         }
         
         .form-group input,
-        .form-group select {
+        .form-group select,
+        .form-group textarea {
             padding: 10px;
             border: 1px solid #d4b89c;
             border-radius: 5px;
             font-size: 1em;
+        }
+        
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
         }
         
         .btn {
@@ -231,6 +237,103 @@
             display: none;
         }
         
+        .api-method-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .api-method-btn {
+            flex: 1;
+            padding: 12px;
+            background-color: #f5f0e6;
+            border: 2px solid #d4b89c;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: bold;
+            color: #5a3809;
+            transition: all 0.3s;
+        }
+        
+        .api-method-btn.active {
+            background-color: #8b4513;
+            color: white;
+            border-color: #8b4513;
+        }
+        
+        .api-config-section {
+            display: none;
+        }
+        
+        .api-config-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .api-provider-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .api-provider-card {
+            background-color: white;
+            border: 1px solid #e6d5c3;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .api-provider-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 3px 10px rgba(139, 69, 19, 0.1);
+        }
+        
+        .api-provider-card.active {
+            background-color: #fff8f0;
+            border-color: #8b4513;
+            border-width: 2px;
+        }
+        
+        .api-provider-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .api-test-area {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f5f0e6;
+            border-radius: 5px;
+        }
+        
+        .test-question {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #d4b89c;
+            border-radius: 5px;
+        }
+        
+        .test-result {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 5px;
+            border: 1px solid #e6d5c3;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
         @media (max-width: 768px) {
             .container {
                 padding: 20px;
@@ -248,6 +351,10 @@
             }
             
             .jingfang-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .api-provider-grid {
                 grid-template-columns: 1fr;
             }
         }
@@ -301,6 +408,30 @@
             margin-top: 10px;
             display: flex;
             justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+        
+        .badge-success {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+        
+        .badge-warning {
+            background-color: #fff3e0;
+            color: #ef6c00;
+        }
+        
+        .badge-error {
+            background-color: #ffebee;
+            color: #c62828;
         }
     </style>
 </head>
@@ -394,22 +525,190 @@
         <div id="config-page" class="hidden">
             <div class="config-section">
                 <h2>API配置</h2>
-                <p>配置您的API密钥以使用经方AI助手功能。您可以选择使用GitHub API或自定义API端点。</p>
+                <p>配置您的AI API密钥以使用经方AI助手功能。您可以选择不同的API服务商和调用方式。</p>
                 
-                <div class="config-form">
-                    <div class="form-group">
-                        <label for="api-type">API类型</label>
-                        <select id="api-type" onchange="toggleApiFields()">
-                            <option value="github">GitHub API</option>
-                            <option value="custom">自定义API</option>
-                        </select>
+                <div class="api-method-selector">
+                    <div class="api-method-btn active" onclick="selectApiMethod('frontend')">前端直连API</div>
+                    <div class="api-method-btn" onclick="selectApiMethod('github')">GitHub Actions</div>
+                </div>
+                
+                <!-- 前端直连API配置 -->
+                <div id="frontend-api-config" class="api-config-section active">
+                    <h3>选择AI服务商</h3>
+                    <div class="api-provider-grid">
+                        <div class="api-provider-card active" onclick="selectApiProvider('openai')">
+                            <div class="api-provider-icon">🤖</div>
+                            <div><strong>OpenAI</strong></div>
+                            <div style="font-size: 0.9em; color: #777;">GPT-4/GPT-4o</div>
+                        </div>
+                        <div class="api-provider-card" onclick="selectApiProvider('gemini')">
+                            <div class="api-provider-icon">✨</div>
+                            <div><strong>Google Gemini</strong></div>
+                            <div style="font-size: 0.9em; color: #777;">Gemini Pro</div>
+                        </div>
+                        <div class="api-provider-card" onclick="selectApiProvider('deepseek')">
+                            <div class="api-provider-icon">🧠</div>
+                            <div><strong>DeepSeek</strong></div>
+                            <div style="font-size: 0.9em; color: #777;">DeepSeek-R1</div>
+                        </div>
+                        <div class="api-provider-card" onclick="selectApiProvider('claude')">
+                            <div class="api-provider-icon">🎭</div>
+                            <div><strong>Claude</strong></div>
+                            <div style="font-size: 0.9em; color: #777;">Anthropic</div>
+                        </div>
+                        <div class="api-provider-card" onclick="selectApiProvider('custom')">
+                            <div class="api-provider-icon">⚙️</div>
+                            <div><strong>自定义</strong></div>
+                            <div style="font-size: 0.9em; color: #777;">其他API</div>
+                        </div>
                     </div>
                     
-                    <!-- GitHub API配置 -->
-                    <div id="github-fields">
+                    <!-- OpenAI配置 -->
+                    <div id="openai-config" class="api-provider-config">
+                        <div class="config-form">
+                            <div class="form-group">
+                                <label for="openai-api-key">OpenAI API密钥</label>
+                                <input type="password" id="openai-api-key" placeholder="sk-...">
+                                <small style="color: #777; margin-top: 5px;">
+                                    <a href="https://platform.openai.com/api-keys" target="_blank" style="color: #8b4513;">如何获取OpenAI API密钥？</a>
+                                </small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="openai-model">选择模型</label>
+                                <select id="openai-model">
+                                    <option value="gpt-4">GPT-4</option>
+                                    <option value="gpt-4o" selected>GPT-4o (推荐)</option>
+                                    <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="openai-endpoint">API端点 (可选)</label>
+                                <input type="text" id="openai-endpoint" placeholder="https://api.openai.com/v1/chat/completions">
+                                <small style="color: #777; margin-top: 5px;">默认使用官方端点，可配置代理或自定义端点</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Gemini配置 -->
+                    <div id="gemini-config" class="api-provider-config hidden">
+                        <div class="config-form">
+                            <div class="form-group">
+                                <label for="gemini-api-key">Gemini API密钥</label>
+                                <input type="password" id="gemini-api-key" placeholder="AIza...">
+                                <small style="color: #777; margin-top: 5px;">
+                                    <a href="https://makersuite.google.com/app/apikey" target="_blank" style="color: #8b4513;">如何获取Gemini API密钥？</a>
+                                </small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="gemini-model">选择模型</label>
+                                <select id="gemini-model">
+                                    <option value="gemini-pro" selected>Gemini Pro</option>
+                                    <option value="gemini-pro-vision">Gemini Pro Vision</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="gemini-safety-settings">安全设置 (JSON格式)</label>
+                                <textarea id="gemini-safety-settings" placeholder='{"HARM_CATEGORY_HARASSMENT":"BLOCK_NONE","HARM_CATEGORY_HATE_SPEECH":"BLOCK_NONE"}'>{"HARM_CATEGORY_HARASSMENT":"BLOCK_NONE","HARM_CATEGORY_HATE_SPEECH":"BLOCK_NONE","HARM_CATEGORY_SEXUALLY_EXPLICIT":"BLOCK_NONE","HARM_CATEGORY_DANGEROUS_CONTENT":"BLOCK_NONE"}</textarea>
+                                <small style="color: #777; margin-top: 5px;">调整内容安全设置，避免中医内容被误拦截</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- DeepSeek配置 -->
+                    <div id="deepseek-config" class="api-provider-config hidden">
+                        <div class="config-form">
+                            <div class="form-group">
+                                <label for="deepseek-api-key">DeepSeek API密钥</label>
+                                <input type="password" id="deepseek-api-key" placeholder="sk-...">
+                                <small style="color: #777; margin-top: 5px;">
+                                    <a href="https://platform.deepseek.com/api_keys" target="_blank" style="color: #8b4513;">如何获取DeepSeek API密钥？</a>
+                                </small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="deepseek-model">选择模型</label>
+                                <select id="deepseek-model">
+                                    <option value="deepseek-chat">DeepSeek Chat</option>
+                                    <option value="deepseek-coder">DeepSeek Coder</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Claude配置 -->
+                    <div id="claude-config" class="api-provider-config hidden">
+                        <div class="config-form">
+                            <div class="form-group">
+                                <label for="claude-api-key">Claude API密钥</label>
+                                <input type="password" id="claude-api-key" placeholder="sk-ant-...">
+                                <small style="color: #777; margin-top: 5px;">
+                                    <a href="https://console.anthropic.com/settings/keys" target="_blank" style="color: #8b4513;">如何获取Claude API密钥？</a>
+                                </small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="claude-model">选择模型</label>
+                                <select id="claude-model">
+                                    <option value="claude-3-opus">Claude 3 Opus</option>
+                                    <option value="claude-3-sonnet">Claude 3 Sonnet</option>
+                                    <option value="claude-3-haiku">Claude 3 Haiku</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 自定义API配置 -->
+                    <div id="custom-config" class="api-provider-config hidden">
+                        <div class="config-form">
+                            <div class="form-group">
+                                <label for="custom-api-endpoint">API端点URL</label>
+                                <input type="text" id="custom-api-endpoint" placeholder="https://api.example.com/v1/chat/completions">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="custom-api-key">API密钥 (可选)</label>
+                                <input type="password" id="custom-api-key" placeholder="输入您的API密钥">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="custom-api-model">模型名称</label>
+                                <input type="text" id="custom-api-model" placeholder="例如: custom-model">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="custom-api-format">请求格式</label>
+                                <select id="custom-api-format">
+                                    <option value="openai">OpenAI兼容格式</option>
+                                    <option value="custom">自定义格式</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- API测试区域 -->
+                    <div class="api-test-area">
+                        <h4>测试API连接</h4>
+                        <input type="text" class="test-question" id="test-question" placeholder="输入测试问题，例如：什么是经方？" value="请简要介绍什么是中医经方？">
+                        <button class="btn" onclick="testApiConnection()">测试API连接</button>
+                        <div class="test-result" id="test-result"></div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button class="btn" onclick="saveFrontendConfig()">保存配置</button>
+                        <button class="btn btn-secondary" onclick="clearFrontendConfig()">清除配置</button>
+                    </div>
+                </div>
+                
+                <!-- GitHub Actions配置 -->
+                <div id="github-api-config" class="api-config-section hidden">
+                    <div class="config-form">
                         <div class="form-group">
                             <label for="github-token">GitHub个人访问令牌</label>
-                            <input type="password" id="github-token" placeholder="输入您的GitHub个人访问令牌">
+                            <input type="password" id="github-token" placeholder="ghp_...">
                             <small style="color: #777; margin-top: 5px;">
                                 <a href="https://github.com/settings/tokens" target="_blank" style="color: #8b4513;">如何获取GitHub令牌？</a> (需要repo权限)
                             </small>
@@ -425,25 +724,11 @@
                             <input type="text" id="github-repo" placeholder="例如：ai-learning-">
                             <small style="color: #777; margin-top: 5px;">存储问答记录的仓库名称</small>
                         </div>
-                    </div>
-                    
-                    <!-- 自定义API配置 -->
-                    <div id="custom-fields" class="hidden">
-                        <div class="form-group">
-                            <label for="custom-api-endpoint">API端点URL</label>
-                            <input type="text" id="custom-api-endpoint" placeholder="https://api.example.com/ask">
-                        </div>
                         
-                        <div class="form-group">
-                            <label for="custom-api-key">API密钥</label>
-                            <input type="password" id="custom-api-key" placeholder="输入您的API密钥">
+                        <div style="display: flex; gap: 10px;">
+                            <button class="btn" onclick="saveGithubConfig()">保存配置</button>
+                            <button class="btn btn-secondary" onclick="clearGithubConfig()">清除配置</button>
                         </div>
-                    </div>
-                    
-                    <div style="display: flex; gap: 10px;">
-                        <button class="btn" onclick="saveConfig()">保存配置</button>
-                        <button class="btn btn-secondary" onclick="testConfig()">测试连接</button>
-                        <button class="btn btn-secondary" onclick="clearConfig()">清除配置</button>
                     </div>
                 </div>
                 
@@ -452,9 +737,9 @@
                 <div style="margin-top: 30px; padding: 15px; background-color: #f5f0e6; border-radius: 5px;">
                     <h3 style="color: #8b4513; margin-bottom: 10px;">使用说明</h3>
                     <ul style="color: #5a3809;">
-                        <li><strong>GitHub API模式：</strong>需要创建GitHub个人访问令牌，并确保拥有对应仓库的访问权限</li>
-                        <li><strong>自定义API模式：</strong>可以连接您自己的AI服务端点，需要返回JSON格式的响应</li>
-                        <li>配置信息将保存在您的浏览器本地存储中，不会上传到服务器</li>
+                        <li><strong>前端直连API：</strong>直接在浏览器中调用AI API，响应速度快，需要配置API密钥</li>
+                        <li><strong>GitHub Actions：</strong>通过GitHub工作流处理，无需在前端暴露API密钥，但响应较慢</li>
+                        <li><strong>配置信息</strong>将保存在您的浏览器本地存储中，不会上传到服务器</li>
                         <li>首次使用前必须配置API才能正常使用AI问答功能</li>
                     </ul>
                 </div>
@@ -472,6 +757,7 @@
                 <div style="text-align: center; margin-bottom: 20px;">
                     <button class="btn" onclick="loadQARecords()">刷新记录</button>
                     <button class="btn btn-secondary" onclick="clearQARecords()">清除本地记录</button>
+                    <button class="btn btn-secondary" onclick="exportQARecords()">导出记录</button>
                 </div>
                 
                 <div id="qa-list" class="qa-list">
@@ -499,11 +785,15 @@
       </div>
       <div style="padding:15px; border-bottom:1px solid #e6d5c3;">
         <label style="color:#8b4513; font-size:0.9em; margin-right:10px;">选择AI模型：</label>
-        <select id="model-select" style="padding:8px 12px; border:1px solid #8b4513; border-radius:6px; background:#fff; color:#5a3809; font-size:0.9em; cursor:pointer;">
-          <option value="gpt-40">GPT-40 (综合全面)</option>
-          <option value="deepseek-r1">DeepSeek-R1 (逻辑推理)</option>
-          <option value="llama-3-70b">Llama 3 (开源代表)</option>
+        <select id="model-select" style="padding:8px 12px; border:1px solid #8b4513; border-radius:6px; background:#fff; color:#5a3809; font-size:0.9em; cursor:pointer;" onchange="updateApiMethod()">
+          <option value="gpt-4o">GPT-4o (综合全面)</option>
+          <option value="gemini-pro">Gemini Pro (逻辑推理)</option>
+          <option value="deepseek-chat">DeepSeek (中文优化)</option>
+          <option value="claude-3-sonnet">Claude 3 (分析深入)</option>
         </select>
+        <div id="api-status" style="margin-top: 8px; font-size: 0.8em; color: #777;">
+          <span id="api-method-indicator">⚡ 前端直连</span>
+        </div>
       </div>
       <div id="chat-box" style="height:350px; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:12px; background:#fcf8f3;"></div>
       <div style="padding:20px; border-top:1px solid #e6d5c3; background:#fff;">
@@ -525,6 +815,8 @@
     <script>
         // ========== 全局变量 ==========
         let currentPage = 'home';
+        let currentApiMethod = 'frontend'; // 'frontend' 或 'github'
+        let currentApiProvider = 'openai'; // 'openai', 'gemini', 'deepseek', 'claude', 'custom'
         
         // ========== 页面导航函数 ==========
         function showHome() {
@@ -551,86 +843,210 @@
         }
         
         // ========== API配置功能 ==========
-        function toggleApiFields() {
-            const apiType = document.getElementById('api-type').value;
-            if (apiType === 'github') {
-                document.getElementById('github-fields').classList.remove('hidden');
-                document.getElementById('custom-fields').classList.add('hidden');
+        function selectApiMethod(method) {
+            currentApiMethod = method;
+            
+            // 更新按钮状态
+            document.querySelectorAll('.api-method-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // 显示对应的配置区域
+            document.getElementById('frontend-api-config').classList.remove('active');
+            document.getElementById('github-api-config').classList.remove('active');
+            document.getElementById(`${method}-api-config`).classList.add('active');
+            
+            updateApiMethod();
+        }
+        
+        function selectApiProvider(provider) {
+            currentApiProvider = provider;
+            
+            // 更新卡片状态
+            document.querySelectorAll('.api-provider-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // 显示对应的配置表单
+            document.querySelectorAll('.api-provider-config').forEach(config => {
+                config.classList.add('hidden');
+            });
+            document.getElementById(`${provider}-config`).classList.remove('hidden');
+        }
+        
+        function updateApiMethod() {
+            const indicator = document.getElementById('api-method-indicator');
+            if (currentApiMethod === 'frontend') {
+                indicator.innerHTML = '⚡ 前端直连';
+                indicator.style.color = '#2e7d32';
             } else {
-                document.getElementById('github-fields').classList.add('hidden');
-                document.getElementById('custom-fields').classList.remove('hidden');
+                indicator.innerHTML = '🔄 GitHub Actions';
+                indicator.style.color = '#ef6c00';
             }
         }
         
         function loadConfig() {
-            const config = JSON.parse(localStorage.getItem('jingfang-api-config') || '{}');
+            // 加载前端API配置
+            const frontendConfig = JSON.parse(localStorage.getItem('jingfang-frontend-api-config') || '{}');
             
-            if (config.apiType) {
-                document.getElementById('api-type').value = config.apiType;
-                toggleApiFields();
+            if (frontendConfig.apiProvider) {
+                selectApiProvider(frontendConfig.apiProvider);
                 
-                if (config.apiType === 'github') {
-                    if (config.githubToken) document.getElementById('github-token').value = config.githubToken;
-                    if (config.githubUsername) document.getElementById('github-username').value = config.githubUsername;
-                    if (config.githubRepo) document.getElementById('github-repo').value = config.githubRepo;
-                } else {
-                    if (config.customEndpoint) document.getElementById('custom-api-endpoint').value = config.customEndpoint;
-                    if (config.customApiKey) document.getElementById('custom-api-key').value = config.customApiKey;
+                // 填充各个API配置
+                if (frontendConfig.openai) {
+                    if (frontendConfig.openai.apiKey) document.getElementById('openai-api-key').value = frontendConfig.openai.apiKey;
+                    if (frontendConfig.openai.model) document.getElementById('openai-model').value = frontendConfig.openai.model;
+                    if (frontendConfig.openai.endpoint) document.getElementById('openai-endpoint').value = frontendConfig.openai.endpoint;
                 }
-            }
-        }
-        
-        function saveConfig() {
-            const apiType = document.getElementById('api-type').value;
-            const config = { apiType };
-            
-            if (apiType === 'github') {
-                config.githubToken = document.getElementById('github-token').value.trim();
-                config.githubUsername = document.getElementById('github-username').value.trim();
-                config.githubRepo = document.getElementById('github-repo').value.trim();
                 
-                if (!config.githubToken || !config.githubUsername) {
-                    showStatus('请填写GitHub令牌和用户名', 'error');
-                    return;
+                if (frontendConfig.gemini) {
+                    if (frontendConfig.gemini.apiKey) document.getElementById('gemini-api-key').value = frontendConfig.gemini.apiKey;
+                    if (frontendConfig.gemini.model) document.getElementById('gemini-model').value = frontendConfig.gemini.model;
+                    if (frontendConfig.gemini.safetySettings) document.getElementById('gemini-safety-settings').value = frontendConfig.gemini.safetySettings;
                 }
-            } else {
-                config.customEndpoint = document.getElementById('custom-api-endpoint').value.trim();
-                config.customApiKey = document.getElementById('custom-api-key').value.trim();
                 
-                if (!config.customEndpoint) {
-                    showStatus('请填写API端点URL', 'error');
-                    return;
+                if (frontendConfig.deepseek) {
+                    if (frontendConfig.deepseek.apiKey) document.getElementById('deepseek-api-key').value = frontendConfig.deepseek.apiKey;
+                    if (frontendConfig.deepseek.model) document.getElementById('deepseek-model').value = frontendConfig.deepseek.model;
+                }
+                
+                if (frontendConfig.claude) {
+                    if (frontendConfig.claude.apiKey) document.getElementById('claude-api-key').value = frontendConfig.claude.apiKey;
+                    if (frontendConfig.claude.model) document.getElementById('claude-model').value = frontendConfig.claude.model;
+                }
+                
+                if (frontendConfig.custom) {
+                    if (frontendConfig.custom.endpoint) document.getElementById('custom-api-endpoint').value = frontendConfig.custom.endpoint;
+                    if (frontendConfig.custom.apiKey) document.getElementById('custom-api-key').value = frontendConfig.custom.apiKey;
+                    if (frontendConfig.custom.model) document.getElementById('custom-api-model').value = frontendConfig.custom.model;
+                    if (frontendConfig.custom.format) document.getElementById('custom-api-format').value = frontendConfig.custom.format;
                 }
             }
             
-            localStorage.setItem('jingfang-api-config', JSON.stringify(config));
-            showStatus('配置保存成功！', 'success');
+            // 加载GitHub配置
+            const githubConfig = JSON.parse(localStorage.getItem('jingfang-github-config') || '{}');
+            
+            if (githubConfig.githubToken) document.getElementById('github-token').value = githubConfig.githubToken;
+            if (githubConfig.githubUsername) document.getElementById('github-username').value = githubConfig.githubUsername;
+            if (githubConfig.githubRepo) document.getElementById('github-repo').value = githubConfig.githubRepo;
         }
         
-        function testConfig() {
-            const config = JSON.parse(localStorage.getItem('jingfang-api-config') || '{}');
+        function saveFrontendConfig() {
+            const config = {
+                apiProvider: currentApiProvider,
+                openai: {
+                    apiKey: document.getElementById('openai-api-key').value.trim(),
+                    model: document.getElementById('openai-model').value,
+                    endpoint: document.getElementById('openai-endpoint').value.trim() || 'https://api.openai.com/v1/chat/completions'
+                },
+                gemini: {
+                    apiKey: document.getElementById('gemini-api-key').value.trim(),
+                    model: document.getElementById('gemini-model').value,
+                    safetySettings: document.getElementById('gemini-safety-settings').value.trim()
+                },
+                deepseek: {
+                    apiKey: document.getElementById('deepseek-api-key').value.trim(),
+                    model: document.getElementById('deepseek-model').value
+                },
+                claude: {
+                    apiKey: document.getElementById('claude-api-key').value.trim(),
+                    model: document.getElementById('claude-model').value
+                },
+                custom: {
+                    endpoint: document.getElementById('custom-api-endpoint').value.trim(),
+                    apiKey: document.getElementById('custom-api-key').value.trim(),
+                    model: document.getElementById('custom-api-model').value.trim(),
+                    format: document.getElementById('custom-api-format').value
+                }
+            };
             
-            if (!config.apiType) {
-                showStatus('请先保存配置', 'error');
+            localStorage.setItem('jingfang-frontend-api-config', JSON.stringify(config));
+            showStatus('前端API配置保存成功！', 'success');
+        }
+        
+        function saveGithubConfig() {
+            const config = {
+                githubToken: document.getElementById('github-token').value.trim(),
+                githubUsername: document.getElementById('github-username').value.trim(),
+                githubRepo: document.getElementById('github-repo').value.trim()
+            };
+            
+            if (!config.githubToken || !config.githubUsername) {
+                showStatus('请填写GitHub令牌和用户名', 'error');
                 return;
             }
             
-            showStatus('正在测试连接...', 'success');
-            
-            // 模拟连接测试
-            setTimeout(() => {
-                showStatus('连接测试成功！配置可用。', 'success');
-            }, 1000);
+            localStorage.setItem('jingfang-github-config', JSON.stringify(config));
+            showStatus('GitHub配置保存成功！', 'success');
         }
         
-        function clearConfig() {
-            localStorage.removeItem('jingfang-api-config');
-            document.getElementById('github-token').value = '';
-            document.getElementById('github-username').value = '';
-            document.getElementById('github-repo').value = '';
-            document.getElementById('custom-api-endpoint').value = '';
-            document.getElementById('custom-api-key').value = '';
-            showStatus('配置已清除', 'success');
+        function clearFrontendConfig() {
+            if (confirm('确定要清除前端API配置吗？')) {
+                localStorage.removeItem('jingfang-frontend-api-config');
+                document.getElementById('openai-api-key').value = '';
+                document.getElementById('gemini-api-key').value = '';
+                document.getElementById('deepseek-api-key').value = '';
+                document.getElementById('claude-api-key').value = '';
+                document.getElementById('custom-api-endpoint').value = '';
+                showStatus('前端API配置已清除', 'success');
+            }
+        }
+        
+        function clearGithubConfig() {
+            if (confirm('确定要清除GitHub配置吗？')) {
+                localStorage.removeItem('jingfang-github-config');
+                document.getElementById('github-token').value = '';
+                document.getElementById('github-username').value = '';
+                document.getElementById('github-repo').value = '';
+                showStatus('GitHub配置已清除', 'success');
+            }
+        }
+        
+        async function testApiConnection() {
+            const testQuestion = document.getElementById('test-question').value.trim();
+            if (!testQuestion) {
+                showStatus('请输入测试问题', 'error');
+                return;
+            }
+            
+            const testResult = document.getElementById('test-result');
+            testResult.innerHTML = '<div style="color: #8b4513;">正在测试API连接...</div>';
+            
+            try {
+                const frontendConfig = JSON.parse(localStorage.getItem('jingfang-frontend-api-config') || '{}');
+                
+                if (!frontendConfig.apiProvider) {
+                    throw new Error('请先保存前端API配置');
+                }
+                
+                const result = await callAIAPI(testQuestion, frontendConfig.apiProvider, '测试模型', true);
+                
+                testResult.innerHTML = `
+                    <div style="color: #2e7d32; font-weight: bold;">✅ API连接测试成功！</div>
+                    <div style="margin-top: 10px; color: #5a3809;">响应时间：${result.responseTime}ms</div>
+                    <div style="margin-top: 10px; color: #5a3809;">模型：${result.model}</div>
+                    <div style="margin-top: 10px; padding: 10px; background-color: #f9f5f0; border-radius: 5px; font-size: 0.9em;">
+                        <strong>测试响应：</strong><br>
+                        ${result.answer.substring(0, 200)}...
+                    </div>
+                `;
+                
+                showStatus('API测试成功！', 'success');
+            } catch (error) {
+                testResult.innerHTML = `
+                    <div style="color: #c62828; font-weight: bold;">❌ API连接测试失败</div>
+                    <div style="margin-top: 10px; color: #5a3809;">错误信息：${error.message}</div>
+                    <div style="margin-top: 10px; color: #5a3809; font-size: 0.9em;">
+                        请检查：<br>
+                        1. API密钥是否正确<br>
+                        2. 网络连接是否正常<br>
+                        3. API服务是否可用
+                    </div>
+                `;
+                showStatus('API测试失败', 'error');
+            }
         }
         
         function showStatus(message, type) {
@@ -650,8 +1066,10 @@
             assistant.style.display = assistant.style.display === 'block' ? 'none' : 'block';
             
             // 检查是否已配置API
-            const config = JSON.parse(localStorage.getItem('jingfang-api-config') || '{}');
-            if (!config.apiType && assistant.style.display === 'block') {
+            const frontendConfig = JSON.parse(localStorage.getItem('jingfang-frontend-api-config') || '{}');
+            const githubConfig = JSON.parse(localStorage.getItem('jingfang-github-config') || '{}');
+            
+            if (!frontendConfig.apiProvider && !githubConfig.githubToken && assistant.style.display === 'block') {
                 const chatBox = document.getElementById('chat-box');
                 chatBox.innerHTML = `
                     <div style="align-self:flex-start; background:#fff3e0; padding:15px; border-radius:12px; max-width:90%; border-left:4px solid #ff9800;">
@@ -683,8 +1101,10 @@
             }
             
             // 检查API配置
-            const config = JSON.parse(localStorage.getItem('jingfang-api-config') || '{}');
-            if (!config.apiType) {
+            const frontendConfig = JSON.parse(localStorage.getItem('jingfang-frontend-api-config') || '{}');
+            const githubConfig = JSON.parse(localStorage.getItem('jingfang-github-config') || '{}');
+            
+            if (!frontendConfig.apiProvider && !githubConfig.githubToken) {
                 alert('请先配置API密钥才能使用AI助手功能。');
                 showConfig();
                 return;
@@ -706,57 +1126,58 @@
                 // 保存问题到本地记录
                 saveQuestionToLocal(userMessage, selectedModel);
                 
-                if (config.apiType === 'github') {
-                    // GitHub API模式
-                    if (!config.githubToken || !config.githubUsername) {
-                        throw new Error('GitHub配置不完整');
-                    }
+                if (currentApiMethod === 'frontend' && frontendConfig.apiProvider) {
+                    // 前端直连API
+                    const result = await callAIAPI(userMessage, frontendConfig.apiProvider, selectedModel);
                     
-                    const repoName = config.githubRepo || 'ai-learning-';
+                    // 保存答案到本地
+                    saveAnswerToLocal(userMessage, result.answer, selectedModel, result.model, result.provider);
                     
-                    // 模拟GitHub API调用（实际使用时需要真实API）
-                    const triggerResponse = await simulateGitHubAPI(config.githubUsername, repoName, userMessage, selectedModel);
+                    // 显示答案
+                    document.getElementById(thinkingId).outerHTML = `
+                        <div style="align-self:flex-start; background:#fffaf0; padding:15px; border-radius:12px 12px 12px 0; max-width:90%; border-left:4px solid #8b4513;">
+                            <strong style="color:#8b4513;">📜 【${result.model}】为您解答：</strong><br>
+                            <span style="color:#5a3809; line-height:1.6;">${result.answer}</span>
+                            <div style="margin-top:10px; font-size:0.9em; color:#777;">
+                                响应时间：${result.responseTime}ms | 已保存到本地记录
+                            </div>
+                        </div>`;
+                } else if (currentApiMethod === 'github' && githubConfig.githubToken) {
+                    // GitHub Actions模式
+                    const repoName = githubConfig.githubRepo || 'ai-learning-';
+                    
+                    // 触发GitHub Actions工作流
+                    const triggerResponse = await fetch(`https://api.github.com/repos/${githubConfig.githubUsername}/${repoName}/dispatches`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `token ${githubConfig.githubToken}`,
+                            'Accept': 'application/vnd.github.v3+json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            event_type: 'ask_ai_question',
+                            client_payload: {
+                                question: userMessage,
+                                model: selectedModel
+                            }
+                        })
+                    });
                     
                     if (!triggerResponse.ok) {
                         throw new Error(`工作流触发失败 (状态码: ${triggerResponse.status})`);
                     }
                     
-                    // 生成模拟答案（实际应从API获取）
-                    const simulatedAnswer = generateSimulatedAnswer(userMessage, selectedModel);
-                    
-                    // 保存答案到本地
-                    saveAnswerToLocal(userMessage, simulatedAnswer, selectedModel);
-                    
-                    // 显示答案
+                    // 显示成功消息
                     document.getElementById(thinkingId).outerHTML = `
-                        <div style="align-self:flex-start; background:#fffaf0; padding:15px; border-radius:12px 12px 12px 0; max-width:90%; border-left:4px solid #8b4513;">
-                            <strong style="color:#8b4513;">📜 【${selectedModel}】为您解答：</strong><br>
-                            <span style="color:#5a3809; line-height:1.6;">${simulatedAnswer}</span>
-                            <div style="margin-top:10px; font-size:0.9em; color:#777;">
-                                答案已保存到本地记录
-                            </div>
+                        <div style="align-self:flex-start; background:#fff3e0; padding:15px; border-radius:12px 12px 12px 0; max-width:90%; border-left:4px solid #8b4513;">
+                            <strong style="color:#8b4513;">✅ 问题已提交到GitHub Actions！</strong><br>
+                            <span style="color:#5a3809;">您的深度解答正在由 <strong>【${selectedModel}】</strong> 生成。<br>
+                            请稍等约30秒，然后刷新问答记录页面查看结果。<br>
+                            <a href="javascript:void(0)" onclick="loadQARecords()" style="color:#a0522d; text-decoration:underline; font-weight:bold; margin-top:5px; display:inline-block;">👉 点击刷新问答记录</a>
+                            </span>
                         </div>`;
                 } else {
-                    // 自定义API模式
-                    if (!config.customEndpoint) {
-                        throw new Error('自定义API端点未配置');
-                    }
-                    
-                    // 模拟自定义API调用
-                    const simulatedAnswer = await simulateCustomAPI(config.customEndpoint, userMessage, selectedModel, config.customApiKey);
-                    
-                    // 保存答案到本地
-                    saveAnswerToLocal(userMessage, simulatedAnswer, selectedModel);
-                    
-                    // 显示答案
-                    document.getElementById(thinkingId).outerHTML = `
-                        <div style="align-self:flex-start; background:#fffaf0; padding:15px; border-radius:12px 12px 12px 0; max-width:90%; border-left:4px solid #8b4513;">
-                            <strong style="color:#8b4513;">📜 【${selectedModel}】为您解答：</strong><br>
-                            <span style="color:#5a3809; line-height:1.6;">${simulatedAnswer}</span>
-                            <div style="margin-top:10px; font-size:0.9em; color:#777;">
-                                答案已保存到本地记录
-                            </div>
-                        </div>`;
+                    throw new Error('API配置不完整');
                 }
                 
                 chatBox.scrollTop = chatBox.scrollHeight;
@@ -770,53 +1191,182 @@
             }
         }
         
-        // ========== 模拟函数（实际使用时需要替换为真实API调用） ==========
-        async function simulateGitHubAPI(username, repo, question, model) {
-            // 模拟API调用延迟
-            await new Promise(resolve => setTimeout(resolve, 1500));
+        async function callAIAPI(question, provider, model, isTest = false) {
+            const startTime = Date.now();
+            const frontendConfig = JSON.parse(localStorage.getItem('jingfang-frontend-api-config') || '{}');
             
-            // 返回模拟的成功响应
-            return {
-                ok: true,
-                status: 200,
-                json: async () => ({ message: 'Workflow dispatched successfully' })
-            };
-        }
-        
-        async function simulateCustomAPI(endpoint, question, model, apiKey) {
-            // 模拟API调用延迟
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            let apiUrl, apiKey, requestBody, responseParser;
             
-            // 根据问题生成模拟答案
-            return generateSimulatedAnswer(question, model);
-        }
-        
-        function generateSimulatedAnswer(question, model) {
-            // 根据模型类型和问题生成不同的模拟答案
-            const baseAnswer = "根据中医经典理论，";
-            const modelSpecific = {
-                'gpt-40': "这是一个综合全面的分析：",
-                'deepseek-r1': "经过逻辑推理分析：",
-                'llama-3-70b': "基于开源模型的分析："
-            };
-            
-            const modelPrefix = modelSpecific[model] || "分析如下：";
-            
-            // 根据问题关键词生成不同的答案
-            let specificAnswer = "";
-            if (question.includes('桂枝汤') && question.includes('麻黄汤')) {
-                specificAnswer = "桂枝汤与麻黄汤都是《伤寒论》中的经典方剂，但适应证不同。桂枝汤主治太阳中风证，以汗出、恶风、脉浮缓为特点；麻黄汤主治太阳伤寒证，以无汗、恶寒、脉浮紧为特点。桂枝汤重在调和营卫，麻黄汤重在发汗解表。";
-            } else if (question.includes('小柴胡汤') && question.includes('半夏汤')) {
-                specificAnswer = "小柴胡汤与半夏泻心汤都是和解剂，但功效和主治不同。小柴胡汤和解少阳，主治少阳证，症见往来寒热、胸胁苦满等；半夏泻心汤寒热平调、消痞散结，主治寒热错杂之痞证，症见心下痞、呕吐、肠鸣下利等。";
-            } else if (question.includes('桂枝汤')) {
-                specificAnswer = "桂枝汤由桂枝、芍药、甘草、生姜、大枣组成，是调和营卫的代表方。现代常用于治疗感冒、发热、自汗、荨麻疹等属营卫不和者。临床应用时需注意煎服法，服药后需啜热粥以助药力。";
-            } else if (question.includes('麻黄汤')) {
-                specificAnswer = "麻黄汤由麻黄、桂枝、杏仁、甘草组成，是发汗解表的峻剂。现代常用于治疗感冒、流感、支气管哮喘等属风寒表实证者。使用时需注意体质虚弱者慎用，中病即止，不可过汗。";
-            } else {
-                specificAnswer = "这个问题涉及中医经方的核心理论。建议深入学习《伤寒杂病论》原文，并结合临床实践理解。中医强调辨证论治，需根据具体证候选择合适方剂，随证加减。";
+            switch (provider) {
+                case 'openai':
+                    const openaiConfig = frontendConfig.openai || {};
+                    apiKey = openaiConfig.apiKey;
+                    apiUrl = openaiConfig.endpoint || 'https://api.openai.com/v1/chat/completions';
+                    const openaiModel = isTest ? openaiConfig.model : model;
+                    
+                    if (!apiKey) throw new Error('OpenAI API密钥未配置');
+                    
+                    requestBody = {
+                        model: openaiModel,
+                        messages: [
+                            {
+                                role: "system",
+                                content: "你是精通《伤寒杂病论》的国医大师，专长于中医经方研究。请按照以下要求回答问题：1.引用相关经典原文 2.详细解释方药组成与配伍原理 3.分析适用证候特点 4.给出现代临床应用建议。语言风格需严谨专业且亲切易懂。"
+                            },
+                            {
+                                role: "user",
+                                content: question
+                            }
+                        ],
+                        temperature: 0.7,
+                        max_tokens: 1500
+                    };
+                    
+                    responseParser = (data) => data.choices[0]?.message?.content || '无响应内容';
+                    break;
+                    
+                case 'gemini':
+                    const geminiConfig = frontendConfig.gemini || {};
+                    apiKey = geminiConfig.apiKey;
+                    apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+                    
+                    if (!apiKey) throw new Error('Gemini API密钥未配置');
+                    
+                    let safetySettings = {};
+                    try {
+                        safetySettings = JSON.parse(geminiConfig.safetySettings || '{}');
+                    } catch (e) {
+                        safetySettings = {};
+                    }
+                    
+                    requestBody = {
+                        contents: [
+                            {
+                                parts: [
+                                    {
+                                        text: `你是精通《伤寒杂病论》的国医大师，专长于中医经方研究。请按照以下要求回答问题：
+1. 引用相关经典原文
+2. 详细解释方药组成与配伍原理
+3. 分析适用证候特点
+4. 给出现代临床应用建议
+语言风格需严谨专业且亲切易懂。
+
+问题：${question}`
+                                    }
+                                ]
+                            }
+                        ],
+                        safetySettings: safetySettings,
+                        generationConfig: {
+                            temperature: 0.7,
+                            maxOutputTokens: 1500
+                        }
+                    };
+                    
+                    responseParser = (data) => {
+                        if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
+                            return data.candidates[0].content.parts[0].text;
+                        }
+                        throw new Error('Gemini API响应格式错误');
+                    };
+                    break;
+                    
+                case 'deepseek':
+                    const deepseekConfig = frontendConfig.deepseek || {};
+                    apiKey = deepseekConfig.apiKey;
+                    apiUrl = 'https://api.deepseek.com/v1/chat/completions';
+                    
+                    if (!apiKey) throw new Error('DeepSeek API密钥未配置');
+                    
+                    requestBody = {
+                        model: model === 'deepseek-chat' ? 'deepseek-chat' : 'deepseek-coder',
+                        messages: [
+                            {
+                                role: "system",
+                                content: "你是精通《伤寒杂病论》的国医大师，专长于中医经方研究。请按照以下要求回答问题：1.引用相关经典原文 2.详细解释方药组成与配伍原理 3.分析适用证候特点 4.给出现代临床应用建议。语言风格需严谨专业且亲切易懂。"
+                            },
+                            {
+                                role: "user",
+                                content: question
+                            }
+                        ],
+                        temperature: 0.7,
+                        max_tokens: 1500
+                    };
+                    
+                    responseParser = (data) => data.choices[0]?.message?.content || '无响应内容';
+                    break;
+                    
+                case 'claude':
+                    const claudeConfig = frontendConfig.claude || {};
+                    apiKey = claudeConfig.apiKey;
+                    apiUrl = 'https://api.anthropic.com/v1/messages';
+                    
+                    if (!apiKey) throw new Error('Claude API密钥未配置');
+                    
+                    requestBody = {
+                        model: model,
+                        max_tokens: 1500,
+                        system: "你是精通《伤寒杂病论》的国医大师，专长于中医经方研究。请按照以下要求回答问题：1.引用相关经典原文 2.详细解释方药组成与配伍原理 3.分析适用证候特点 4.给出现代临床应用建议。语言风格需严谨专业且亲切易懂。",
+                        messages: [
+                            {
+                                role: "user",
+                                content: question
+                            }
+                        ]
+                    };
+                    
+                    responseParser = (data) => {
+                        if (data.content && data.content[0] && data.content[0].text) {
+                            return data.content[0].text;
+                        }
+                        throw new Error('Claude API响应格式错误');
+                    };
+                    break;
+                    
+                default:
+                    throw new Error('不支持的API提供商');
             }
             
-            return baseAnswer + modelPrefix + specificAnswer + " (注：此为模拟答案，实际使用时需连接真实AI服务)";
+            try {
+                const headers = {
+                    'Content-Type': 'application/json'
+                };
+                
+                if (provider !== 'gemini') {
+                    headers['Authorization'] = `Bearer ${apiKey}`;
+                }
+                
+                if (provider === 'claude') {
+                    headers['anthropic-version'] = '2023-06-01';
+                    headers['x-api-key'] = apiKey;
+                }
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify(requestBody)
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`API请求失败: ${response.status} - ${errorText}`);
+                }
+                
+                const data = await response.json();
+                const answer = responseParser(data);
+                const endTime = Date.now();
+                
+                return {
+                    answer: answer,
+                    model: model,
+                    provider: provider,
+                    responseTime: endTime - startTime
+                };
+            } catch (error) {
+                console.error('API调用错误:', error);
+                throw error;
+            }
         }
         
         // ========== 本地存储管理 ==========
@@ -825,21 +1375,25 @@
                 question,
                 model,
                 timestamp: new Date().toISOString(),
-                answer: null
+                answer: null,
+                provider: currentApiProvider,
+                method: currentApiMethod
             };
             
             let records = JSON.parse(localStorage.getItem('jingfang-qa-records') || '[]');
             records.unshift(qaRecord);
-            localStorage.setItem('jingfang-qa-records', JSON.stringify(records.slice(0, 50))); // 最多保存50条
+            localStorage.setItem('jingfang-qa-records', JSON.stringify(records.slice(0, 100))); // 最多保存100条
         }
         
-        function saveAnswerToLocal(question, answer, model) {
+        function saveAnswerToLocal(question, answer, model, actualModel, provider) {
             let records = JSON.parse(localStorage.getItem('jingfang-qa-records') || '[]');
             
             // 找到最近一条未回答的问题
             for (let i = 0; i < records.length; i++) {
                 if (records[i].question === question && records[i].answer === null) {
                     records[i].answer = answer;
+                    records[i].actualModel = actualModel;
+                    records[i].provider = provider;
                     records[i].answerTimestamp = new Date().toISOString();
                     break;
                 }
@@ -867,18 +1421,36 @@
                 qaItem.className = 'qa-item';
                 
                 const date = new Date(record.timestamp).toLocaleString('zh-CN');
+                const hasAnswer = record.answer !== null;
                 
                 let answerContent = record.answer || '等待AI生成答案...';
-                if (!record.answer) {
+                if (!hasAnswer) {
                     answerContent = '<em style="color: #777;">等待AI生成答案...</em>';
+                }
+                
+                let methodBadge = '';
+                if (record.method === 'frontend') {
+                    methodBadge = '<span class="badge badge-success">前端直连</span>';
+                } else if (record.method === 'github') {
+                    methodBadge = '<span class="badge badge-warning">GitHub Actions</span>';
+                }
+                
+                let providerBadge = '';
+                if (record.provider) {
+                    providerBadge = `<span class="badge" style="background-color: #e3f2fd; color: #1565c0;">${record.provider}</span>`;
                 }
                 
                 qaItem.innerHTML = `
                     <div class="qa-question">${record.question}</div>
                     <div class="qa-answer">${answerContent}</div>
                     <div class="qa-meta">
-                        <span>模型：${record.model}</span>
-                        <span>时间：${date}</span>
+                        <div>
+                            ${methodBadge} ${providerBadge}
+                            <span style="margin-left: 10px;">模型：${record.actualModel || record.model}</span>
+                        </div>
+                        <div>
+                            <span>时间：${date}</span>
+                        </div>
                     </div>
                 `;
                 
@@ -893,6 +1465,25 @@
             }
         }
         
+        function exportQARecords() {
+            const records = JSON.parse(localStorage.getItem('jingfang-qa-records') || '[]');
+            const exportData = {
+                exportDate: new Date().toISOString(),
+                totalRecords: records.length,
+                records: records
+            };
+            
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `经方问答记录_${new Date().toISOString().slice(0, 10)}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+        }
+        
         // ========== 初始化函数 ==========
         function init() {
             // 加载配置
@@ -902,9 +1493,13 @@
             showHome();
             
             // 检查是否需要显示配置提示
-            const config = JSON.parse(localStorage.getItem('jingfang-api-config') || '{}');
-            if (!config.apiType) {
+            const frontendConfig = JSON.parse(localStorage.getItem('jingfang-frontend-api-config') || '{}');
+            const githubConfig = JSON.parse(localStorage.getItem('jingfang-github-config') || '{}');
+            
+            if (!frontendConfig.apiProvider && !githubConfig.githubToken) {
                 console.log('首次使用，请配置API');
+            } else {
+                updateApiMethod();
             }
         }
         
