@@ -1,0 +1,74 @@
+name: 中医经方AI助手
+
+on:
+  workflow_dispatch: # 允许手动触发
+  repository_dispatch: # 允许网站前端触发
+    types: [new_question]
+
+permissions:
+  contents: write  # 授予写入文件的权限
+  issues: write    # 授予创建Issue的权限
+
+jobs:
+  process-question:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检查代码
+        uses: actions/checkout@v4
+
+      - name: 调用多种AI模型
+        id: call_ai
+        env:
+          USER_QUESTION: ${{ github.event.client_payload.question || '介绍一下桂枝汤' }}
+          SELECTED_MODEL: ${{ github.event.client_payload.model || 'gpt-4o' }}
+        run: |
+          # 1. 使用GitHub官方AI服务（无需任何外部API密钥）
+          RESPONSE=$(curl -s https://models.inference.ai.azure.com/v1/chat/completions \
+            -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            -d @- <<EOF
+          {
+            "model": "$SELECTED_MODEL",
+            "messages": [
+              {
+                "role": "system",
+                "content": "你是顶级中医经方大师，精通《伤寒论》《金匮要略》。回答需：1.专业准确 2.引经据典 3.语言通俗 4.给出实用建议。"
+              },
+              {
+                "role": "user",
+                "content": "${USER_QUESTION}"
+              }
+            ],
+            "temperature": 0.7,
+            "max_tokens": 1500
+          }
+          EOF
+          )
+
+          # 2. 提取AI回复
+          AI_REPLY=$(echo "$RESPONSE" | python3 -c "import sys, json; print(json.load(sys.stdin)['choices'][0]['message']['content'].strip())" 2>/dev/null || echo "AI正在思考中，请稍后查看更新。")
+
+          # 3. 将问题和回答保存到一个文件，供网站展示
+          echo "### 问题：$USER_QUESTION" > ai_answer.md
+          echo "**使用模型：** $SELECTED_MODEL  " >> ai_answer.md
+          echo "**回答：**  " >> ai_answer.md
+          echo "$AI_REPLY" >> ai_answer.md
+          echo -e "\n---\n*生成时间：$(date)*" >> ai_answer.md
+
+          # 4. 输出结果（用于后续步骤）
+          echo "::set-output name=reply_file::ai_answer.md"
+          echo "::set-output name=model_used::$SELECTED_MODEL"
+
+      - name: 将AI回答推送到仓库
+        run: |
+          # 将生成的回答文件移动到网站目录
+          mkdir -p ai_answers
+          TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+          cp ai_answer.md "ai_answers/q_${TIMESTAMP}.md"
+          
+          # 配置Git并提交
+          git config --global user.name "GitHub AI Assistant"
+          git config --global user.email "ai@github.com"
+          git add ai_answers/
+          git commit -m "📝 AI回答新增于 $(date +'%Y-%m-%d %H:%M')"
+          git push
