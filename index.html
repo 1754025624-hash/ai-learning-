@@ -220,6 +220,122 @@
             <p>传承中医经典，弘扬传统文化</p>
             <p>网站正在建设中，更多内容即将更新...</p>
         </footer>
+    </div> <!-- .container结束 -->
+
+    <!-- ========== 经方AI助手浮窗 ========== -->
+    <div id="ai-assistant" style="display:none; position:fixed; bottom:20px; right:20px; width:380px; background: #fffaf0; border: 2px solid #8b4513; border-radius:12px; box-shadow:0 8px 30px rgba(139, 69, 19, 0.25); font-family: 'Microsoft YaHei'; z-index:1000; max-height:85vh;">
+      <div style="background:#8b4513; color:#fffaf0; padding:18px; border-radius:10px 10px 0 0; display:flex; justify-content:space-between; align-items:center;">
+        <strong style="font-size:1.1em;">🧠 经方智能问答</strong>
+        <button onclick="toggleAssistant()" style="background:none; border:none; color:#fffaf0; font-size:1.5em; line-height:1; cursor:pointer; padding:0 5px;">×</button>
+      </div>
+      <div style="padding:15px; border-bottom:1px solid #e6d5c3;">
+        <label style="color:#8b4513; font-size:0.9em; margin-right:10px;">选择AI模型：</label>
+        <select id="model-select" style="padding:8px 12px; border:1px solid #8b4513; border-radius:6px; background:#fff; color:#5a3809; font-size:0.9em; cursor:pointer;">
+          <option value="gpt-4o">GPT-4o (综合全面)</option>
+          <option value="deepseek-r1">DeepSeek-R1 (逻辑推理)</option>
+          <option value="llama-3-70b">Llama 3 (开源代表)</option>
+        </select>
+      </div>
+      <div id="chat-box" style="height:350px; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:12px; background:#fcf8f3;"></div>
+      <div style="padding:20px; border-top:1px solid #e6d5c3; background:#fff;">
+        <div style="display:flex; margin-bottom:12px;">
+          <input type="text" id="user-input" placeholder="请输入您关于经方的问题，例如：桂枝汤与麻黄汤的主要区别？" style="flex-grow:1; padding:12px 15px; border:1px solid #d4b89c; border-radius:8px 0 0 8px; font-size:0.95em; background:#fff;" onkeypress="if(event.key === 'Enter') sendMessage()">
+          <button onclick="sendMessage()" style="background:#8b4513; color:white; border:none; padding:0 25px; border-radius:0 8px 8px 0; cursor:pointer; font-weight:bold; font-size:0.95em;">发送</button>
+        </div>
+        <p style="color:#a0522d; font-size:0.8em; line-height:1.4; margin-top:10px; padding:8px; background:#fff8f0; border-radius:4px;">
+          💡 提示：解答生成后，请访问 <a href="javascript:void(0)" onclick="openAnswersPage()" style="color:#8b4513; text-decoration:underline; font-weight:bold;">【问答记录】</a> 页面查看完整内容。首次使用需等待约30秒。
+        </p>
+      </div>
     </div>
+    
+    <!-- 右下角触发按钮 -->
+    <button onclick="toggleAssistant()" style="position:fixed; bottom:25px; right:25px; background:#8b4513; color:#fffaf0; border:none; width:60px; height:60px; border-radius:50%; box-shadow:0 6px 20px rgba(139, 69, 19, 0.4); cursor:pointer; z-index:999; font-size:1.8em; display:flex; align-items:center; justify-content:center;">
+      <span style="display:block; margin-top:-3px;">问</span>
+    </button>
+
+    <script>
+        // ========== AI助手核心函数 ==========
+        function toggleAssistant() {
+            const assistant = document.getElementById('ai-assistant');
+            assistant.style.display = assistant.style.display === 'block' ? 'none' : 'block';
+        }
+
+        async function sendMessage() {
+            const inputEl = document.getElementById('user-input');
+            const modelSelectEl = document.getElementById('model-select');
+            const userMessage = inputEl.value.trim();
+            const chatBox = document.getElementById('chat-box');
+            const selectedModel = modelSelectEl.value;
+
+            if (!userMessage) {
+                alert('请输入您的问题。');
+                return;
+            }
+
+            // 显示用户问题
+            chatBox.innerHTML += `<div style="align-self:flex-end; background:#e8f5e9; padding:12px 16px; border-radius:12px 12px 0 12px; max-width:85%; word-wrap:break-word; border:1px solid #c8e6c9;">${userMessage}</div>`;
+            inputEl.value = '';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            // 显示等待状态
+            const thinkingId = 'thinking-' + Date.now();
+            chatBox.innerHTML += `<div id="${thinkingId}" style="align-self:flex-start; background:#f5f5f5; padding:12px 16px; border-radius:12px 12px 12px 0; max-width:85%; color:#8b4513; font-style:italic; border:1px dashed #d4b89c;">
+                <em>🧐【${selectedModel}】正在研读经典，为您撰写解答，请稍候...</em>
+            </div>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            try {
+                // 【重要：请替换下面两个变量的值！】
+                // 1. 获取GitHub个人访问令牌：https://github.com/settings/tokens (需repo权限)
+                // 2. 替换为你的GitHub用户名
+                const yourGitHubToken = 'ghp_xxxxxxxxxxxxxxxxxxxx'; // 替换为你的令牌
+                const repoOwner = '你的GitHub用户名'; // 替换为你的用户名
+
+                // 1. 触发GitHub Actions工作流
+                const triggerResponse = await fetch(`https://api.github.com/repos/${repoOwner}/ai-learning-/dispatches`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `token ${yourGitHubToken}`,
+                        'Accept': 'application/vnd.github.v3+json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        event_type: 'ask_ai_question',
+                        client_payload: {
+                            question: userMessage,
+                            model: selectedModel
+                        }
+                    })
+                });
+
+                if (!triggerResponse.ok) {
+                    throw new Error(`工作流触发失败 (状态码: ${triggerResponse.status})`);
+                }
+
+                // 2. 更新等待提示，引导用户查看记录页
+                document.getElementById(thinkingId).outerHTML = `
+                    <div style="align-self:flex-start; background:#fff3e0; padding:15px; border-radius:12px 12px 12px 0; max-width:90%; border-left:4px solid #8b4513;">
+                        <strong style="color:#8b4513;">✅ 问题已提交！</strong><br>
+                        <span style="color:#5a3809;">您的深度解答正在由 <strong>【${selectedModel}】</strong> 生成，稍后将自动保存。<br>
+                        请稍等约30秒，然后点击下方链接查看：<br>
+                        <a href="javascript:void(0)" onclick="openAnswersPage()" style="color:#a0522d; text-decoration:underline; font-weight:bold; margin-top:5px; display:inline-block;">👉 前往【问答记录】页面查看结果</a>
+                        </span>
+                    </div>`;
+                chatBox.scrollTop = chatBox.scrollHeight;
+
+            } catch (error) {
+                console.error('出错:', error);
+                document.getElementById(thinkingId).outerHTML = `<div style="align-self:flex-start; background:#ffebee; padding:12px 16px; border-radius:12px; max-width:85%; color:#c62828;">
+                    <strong>抱歉，提交出错：</strong>${error.message}。请检查网络和Token配置。
+                </div>`;
+                chatBox.scrollTop = chatBox.scrollHeight;
+            }
+        }
+
+        function openAnswersPage() {
+            // 打开问答记录页面（需提前创建）
+            window.open('https://你的GitHub用户名.github.io/ai-learning-/ai_answers/', '_blank');
+        }
+    </script>
 </body>
 </html>
